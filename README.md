@@ -5,7 +5,7 @@
     <p>Profesor: Esteban Badilla Alvarado</p>
     <p>Estudiantes: <br>Sergio Castillo Víquez, C31824 <br>
     Rodrigo Sánchez Araya, C37259<br>
-    Jonathan Monge Cascante, 
+    Jonathan Monge Cascante, B94955
     </p>
 </p>
 
@@ -13,19 +13,19 @@
 ## Primera Fase del Proyecto - Parte Teórica 
 
 ## Definición de términos e ideas
-Para tener una idea clara de lo que se quiere realizar se deben saber los términos utilizados dentro de este proyecto, por lo tanto, se debe investigar y saber que son cada uno de ellos y saber que conllevan y como funcionan, con el fin de que a la hora de implementarlos dentro del código ya sea como una función o de alguna otra forma, estos sean realistas y se apeguen a un funcionamiento real.
+Para tener una idea clara de lo que se quiere realizar es necesario definir los términos utilizados dentro de este proyecto, por lo tanto, se debe investigar y definir cada uno de ellos y determinar qué conllevan y cómo se implementan. Esto con el fin de que, a la hora de implementarlos dentro del código, ya sea como una función o de alguna otra forma, estos sean realistas y se apeguen a un funcionamiento real.
 
 ### Atención a clientes
-Basándonos en un banco podemos observar las opciones de atención a clientes que este brinda, por ejemplo, el Scotiabank da un número telefónico al que se puede llamar también permite un chat en línea, por lo tanto, se pude implementar que esta opción brindé estas opciones. Sin embargo, 
+Basándose en un banco, podemos observar las opciones de atención a clientes que este brinda. Por ejemplo, el Scotiabank proporciona un número telefónico al que se puede llamar, también permite un chat en línea, por lo tanto, se puede implementar que esta opción brinde la información de contacto necesaria. 
 
 ### Préstamos Personales
-Están enfocados en cubrir necesidades a corto plazo y en general enfocados en gastos propios o familiares, por lo general y basándonos en el banco Scotiabank las tasas de interés van de 23% a 24% en colones y son de tasa fija también estos prestamos en este banco son realizables únicamente en la opción de colones, estos datos también son muy distintos dependiendo del banco en el que se busque, sin embargo, por indicación el monto del préstamo será ingresado por el usuario, quien también podrá personalizar los valores de monto, número de cuotas y tasa de interés.
+Están enfocados en cubrir necesidades a corto plazo y en general enfocados en gastos propios o familiares, por lo general y basándose en el banco Scotiabank las tasas de interés van de 23% a 24% en colones y son de tasa fija. Además, estos préstamos en este banco son realizables únicamente en la opción de colones, estos datos también son muy distintos dependiendo del banco en el que se busque, sin embargo, por indicación el monto del préstamo será ingresado por el usuario, quien también podrá personalizar los valores de monto, número de cuotas y la tasa de interés.
 
 ### Préstamos Prendarios
 Estos préstamos son principalmente financiamientos para compra de bienes de capital, vehículos principalmente, por lo que se toma como un sistema de financiamiento que permite obtener la aprobación del crédito para vehículo, nuevamente tomando como base el banco Scotiabank este, por ejemplo, da primas desde el 10%, plazos de hasta 96 meses y la opción de colones y dólares, pero nuevamente el monto del préstamo será ingresado por el usuario, también podrá personalizar los valores de monto, número de cuotas y tasa de interés.
 
 ### Préstamos Hipotecarios
-Los prestamos hipotecarios son prestamos a mediano o largo plazo y por lo general se otorga para la compra, ampliación, reparación o construcción de una vivienda, compra de sitios, oficinas o locales comerciales y son generalmente créditos que permiten a las personas adquirir una vivienda. Estos basándonos en el banco ya dicho ofrece este crédito en la opción de dólares o colones con tasas de 10 a 10,50% en colones y de 6,95 a 8,50% en dólares. Nuevamente y al igual que los anteriores prestamos dichos el monto del préstamo será ingresado por el usuario, también podrá personalizar los valores de monto, número de cuotas y tasa de interés.
+Los préstamos hipotecarios son préstamos a mediano o largo plazo y, por lo general, se otorgan para la compra, ampliación, reparación o construcción de una vivienda, compra de sitios, oficinas o locales comerciales y son generalmente créditos que permiten a las personas adquirir una vivienda. Estos, basándonos en el banco ya dicho ofrece este crédito en la opción de dólares o colones con tasas de 10 a 10,50% en colones y de 6,95 a 8,50% en dólares. Nuevamente y al igual que los anteriores préstamos dichos, el monto del préstamo será ingresado por el usuario; también podrá personalizar los valores de monto, número de cuotas y tasa de interés.
 
 ### Abonos a préstamos propios o de terceros
 Los abonos son pagos en una cantidad adicional al pago mínimo requerido por el préstamo con la cual se tiene una obligación, y esa cantidad extra se destina directamente a reducir el monto principal del préstamo. Por lo que esta se ve como una reducción directa al monto total del préstamo que puede ser tanto a el personal como al de un tercero.
@@ -59,11 +59,16 @@ Es un depósito que se pacta a un periodo de tiempo, el cual es acordado entre e
 Son un producto de ahorro a través del cual los clientes depositan una cantidad de dinero en la entidad financiera durante un periodo de tiempo determinado. Puede verse como un aumento en el saldo disponible de la cuenta bancaria. 
 
 ### Retiro 
-Un retiro bancario consiste en extraer dinero de un banco, por ende, se refiere a una reducción de dinero de la cuenta bancaria. 
+Un retiro bancario consiste en extraer dinero de un banco, por ende, se refiere a una reducción de dinero de la cuenta bancaria de un usuario registrado, siempre y cuando este tenga fondos disponibles. 
 
 ### Transferencia 
 Es una operación por la que una persona desde una cuenta suya envíe una determinada cantidad de dinero a la cuenta de otra persona que puede ser de su mismo banco o de otro. Este puede verse como un movimiento en la cuenta del usuario.
 
 ### Referencias 
 
-Simulador de préstamos personales y empresas - Calculadora Billin. (2018). Billin. https://www.billin.net/simulador-prestamos-personales-calculadora/
+1. Simulador de préstamos personales y empresas - Calculadora Billin. (2018). Billin. https://www.billin.net/simulador-prestamos-personales-calculadora/
+
+## Primera Fase del Proyecto - Parte de Diseño 
+
+## Cronograma de actividades
+
