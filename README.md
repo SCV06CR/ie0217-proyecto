@@ -1,4 +1,14 @@
-# Proyecto de Estructuras Abstractas de Datos y Algoritmos para Ingeniería - IE0217 - Sergio Castillo Víquez - Rodrigo Sánchez Araya - Jonathan Monge Cascante
+
+<p align="center">
+    <h1>Proyecto de Estructuras Abstractas de Datos y Algoritmos para Ingeniería - IE0217</h1>
+    <h3>Investigación, diseño e implementación de un sistema de gestión bancaria.</h3>
+    <p>Profesor: Esteban Badilla Alvarado</p>
+    <p>Estudiantes: <br>Sergio Castillo Víquez, C3 <br>
+    Rodrigo Sánchez Araya, C37259<br>
+    Jonathan Monge Cascante, 
+    </p>
+</p>
+
 
 ## Primera Fase del Proyecto - Parte Teórica 
 
