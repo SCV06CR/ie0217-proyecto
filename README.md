@@ -9,8 +9,14 @@
     </p>
 </p>
 
+## Tabla de contenidos
+- [Primera Fase del Proyecto - Parte Teórica](#primera-fase-del-proyecto-parte-teórica)
+- [Definición de términos e ideas](#definición-de-términos-e-ideas)
+- [Primera Fase del Proyecto - Parte de Diseño](#primera-fase-del-proyecto-parte-de-diseño)
+- [Cronograma de actividades](#cronograma-de-actividades)
+- [Referencias](#referencias)
 
-## Primera Fase del Proyecto - Parte Teórica 
+## Primera Fase del Proyecto - Parte Teórica
 
 ## Definición de términos e ideas
 Para tener una idea clara de lo que se quiere realizar es necesario definir los términos utilizados dentro de este proyecto, por lo tanto, se debe investigar y definir cada uno de ellos y determinar qué conllevan y cómo se implementan. Esto con el fin de que, a la hora de implementarlos dentro del código, ya sea como una función o de alguna otra forma, estos sean realistas y se apeguen a un funcionamiento real.
@@ -32,6 +38,16 @@ Los abonos son pagos en una cantidad adicional al pago mínimo requerido por el 
 
 ### Tasa de interés, plazo en meses y cuota mensual en los préstamos
 El interés es un precio que el cliente paga a la entidad por disponer del capital prestado. El Plazo es un periodo de tiempo estipulado en el contrato para devolver el principal más el interés. Las cuotas son la cantidad que se deben pagar cada mes e incluyen el interés y la parte proporcional de la cantidad utilizada del total del préstamo.
+
+### Tipos de interés
+**Interés fijo :** 
+El interés fijo refiere al tipo de interés que se mantiene constante a lo largo del tiempo del préstamo, es decir, se mantiene invariable respecto a la tasa de interés del mercado.
+
+**Interés variable :** 
+Al contrario del interés fijo, este es actualizado respecto a la tasa de interés del mercado bajo plazos establecidos por la entidad financiera. Además, la entidad define previamente un rango dentro del cual varía el tipo de interés.
+
+**Interés mixto :**
+Cómo lo indica su nombre, este tipo de interés mezcla los dos tipos de interés anteriores, de modo que durante los primeros años del préstamo el tipo de interés es fijo; sin embargo, durante los años restantes del préstamo, el interés es de tipo variable.
 
 ### Abonos al capital en préstamos
 Es abonar al total del prestamo y no a los intereses, entonces, como cada mes la cuota llega por un monto de capital y un monto de intereses, en algunos créditos se puede abonar a capital, de modo que se reduzca la deuda y solo quede debiendo los intereses.
@@ -64,11 +80,13 @@ Un retiro bancario consiste en extraer dinero de un banco, por ende, se refiere 
 ### Transferencia 
 Es una operación por la que una persona desde una cuenta suya envíe una determinada cantidad de dinero a la cuenta de otra persona que puede ser de su mismo banco o de otro. Este puede verse como un movimiento en la cuenta del usuario.
 
-### Referencias 
-
-1. Simulador de préstamos personales y empresas - Calculadora Billin. (2018). Billin. https://www.billin.net/simulador-prestamos-personales-calculadora/
-
-## Primera Fase del Proyecto - Parte de Diseño 
+## Primera Fase del Proyecto: Parte de Diseño 
+Concluida la sección teórica, se detalla el diseño que el programa de gestión bancaria necesita para su correcto funcionamiento según las intrucciones asignadas.
 
 ## Cronograma de actividades
 
+### Referencias 
+
+1. Billin. (2018). Simulador de préstamos personales y empresas - Calculadora Billin. https://www.billin.net/simulador-prestamos-personales-calculadora/
+
+2. GCFGlobal. Crédito: ¿Cuáles son los tipos de interés? Recuperado el 22 de Octubre, 2024, de https://edu.gcfglobal.org/es/credito/cuales-son-las-tasas-de-interes/1/
