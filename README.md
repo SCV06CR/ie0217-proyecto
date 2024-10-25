@@ -83,6 +83,10 @@ Es una operación por la que una persona desde una cuenta suya envíe una determ
 ## Primera Fase del Proyecto: Parte de Diseño 
 Concluida la sección teórica, se detalla el diseño que el programa de gestión bancaria necesita para su correcto funcionamiento según las intrucciones asignadas.
 
+### Diagrama de Flujo 
+
+![Diagrama de Flujo Proyecto](image.png)
+
 ## Cronograma de actividades
 
 ### Referencias 
