@@ -85,9 +85,10 @@ Concluida la sección teórica, se detalla el diseño que el programa de gestió
 
 ### Diagrama de Flujo 
 
-![Diagrama de Flujo Proyecto](DIagramaProyecto.png)
+![Diagrama de Flujo Proyecto](imagenes/DIagramaProyecto.png)
 
 ## Cronograma de actividades
+![Cronograma de Actividades](imagenes/Cronograma.jpg)
 
 ### Referencias 
 
