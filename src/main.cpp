@@ -1,5 +1,7 @@
 #include <iostream> 
 #include "TipoCambio.hpp"
+#include "agregarCuenta.hpp"
+#include "verificacionCaracteres.hpp"
 
 using namespace std; 
 
@@ -9,7 +11,8 @@ int main(){
     double TipoCambioMax = 537.5;
     double TipoCambio = generarTipoCambio(TipoCambioMin, TipoCambioMax); 
 
-
+    // Crea las tablas de datos si no existen
+    crearTablas();
 
 
     do{
@@ -72,13 +75,22 @@ int main(){
                 } while (opcion1 != 3);
             } 
             case 2: {
-                char nombreUser;
+                string nombreUser;
                 char contrasena;
                 char verifContrasena;
                 int option2;
-                cout << "\nPara crear una cuenta se requieren los siguientes datos: \n1. Nombre completo.\nSeleccionar tipo de cuenta.\nCrear una contraseña. " << endl; 
-                cout << "\n1. Ingrese su nombre completo: " << endl; 
-                cin >> nombreUser;
+                cout << "-----------------------------------------------------------------------------" << endl; 
+                cout << "|                                Crear cuenta                               |" <<  endl;
+                cout << "-----------------------------------------------------------------------------" << endl;  
+                cout << "|                                                                           |" <<  endl;
+                //cout << "\nPara crear una cuenta se requieren los siguientes datos: \n1. Nombre completo.\nSeleccionar tipo de cuenta.\nCrear una contraseña. " << endl; 
+                //cout << "\n1. Ingrese su nombre completo: " << endl; 
+                //cin >> nombreUser;
+                
+                // Funcion para ingresar y validar el nombre
+                nombreUser = verificarNombre();
+                cout << endl;
+
                 //Esta bien usar tanto do??
                 do{
                     cout << "\n2. Favor ingrese la contraseña que desea asignar" << endl; 
@@ -88,7 +100,8 @@ int main(){
                 }while(contrasena != verifContrasena);
 
                 cout << "\nIngrese el tipo de cuenta que desea tener:\1. Cuenta en colones.\n2. Cuenta en dólares.\n3. Cuenta en ambas monedas." << endl; 
-                cin >> option2; 
+                cin >> option2;
+                crearCuenta(option2, nombreUser);
                 // LLamar a la funcion para cuardar los elementos en la DB @SCV06CR
 
                 cout << "\nImprimir los datos de la cuenta" << endl;
@@ -96,6 +109,7 @@ int main(){
                 // Imprimir CVV
                 // Imprimir Pin
                 // Mostrar por un lado en colones y al otro en dolares (Si fuera creacion de ambas)
+                break;
             }
             case 3:{
                 cout << "\nSaliendo del programa...\nGracias por su visita." << endl;
@@ -103,6 +117,7 @@ int main(){
             } 
             default: 
                 cout << "\nOpción inválida... \n\nFavor ingrese una opción correcta.\n\n";
+                break;
         } 
 
 } while (option != 3);
