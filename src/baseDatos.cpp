@@ -57,7 +57,6 @@ void crearTablas(sqlite3* db) {
             tipo_movimiento TEXT CHECK(tipo_movimiento IN ('Transferencia', 'Deposito', 'Retiro')),
             monto INTEGER NOT NULL CHECK(monto > 0),
             fecha TEXT DEFAULT CURRENT_TIMESTAMP,
-            password TEXT NOT NULL,
             FOREIGN KEY (id) REFERENCES Cuenta_Colones(id) ON DELETE CASCADE
         );
     )";
@@ -71,7 +70,6 @@ void crearTablas(sqlite3* db) {
             meses INTEGER NOT NULL,
             monto INTEGER NOT NULL,
             cuotas_pagadas INTEGER NOT NULL CHECK(cuotas_pagadas >= 0),
-            password TEXT NOT NULL,
             FOREIGN KEY (id_cuenta) REFERENCES Cuenta_Colones(id) ON DELETE CASCADE
         );
     )";
@@ -83,18 +81,6 @@ void crearTablas(sqlite3* db) {
     ejecutarSQL(db, sqlPrestamos);
 }
 
-// Función para modificar las tablas y agregar la columna "Password" si no existe (para tablas creadas previamente)
-void modificarTablas(sqlite3* db) {
-    const char* sqlCuentaColones = "ALTER TABLE Cuenta_Colones ADD COLUMN password TEXT;";
-    const char* sqlCuentaDolares = "ALTER TABLE Cuenta_Dolares ADD COLUMN password TEXT;";
-    const char* sqlPrestamos = "ALTER TABLE Prestamos ADD COLUMN password TEXT;";
-    const char* sqlMovimientos = "ALTER TABLE Movimientos ADD COLUMN password TEXT;";
-
-    ejecutarSQL(db, sqlCuentaColones);
-    ejecutarSQL(db, sqlCuentaDolares);
-    ejecutarSQL(db, sqlPrestamos);
-    ejecutarSQL(db, sqlMovimientos);
-}
 
 // Función de hash para simular la encriptación de la contraseña (simulación)
 string hashContraseña(const string& contraseña) {
@@ -118,9 +104,6 @@ int main() {
         
         // Crear las tablas
         crearTablas(db);
-
-        // Modificar las tablas para agregar la columna "password" en caso de que ya existan
-        modificarTablas(db);
 
         // Ejemplo de inserción de una contraseña encriptada para una cuenta en Cuenta_Colones
         int idCuenta = 1;  // ID de la cuenta para el ejemplo
