@@ -1,19 +1,12 @@
 #include <iostream>
 #include <sqlite3.h>
+#include <iomanip>
+#include <vector>
+#include <string>
+#include "AbrirDB.hpp"
 using namespace std;
 
-
-// Función para abrir la base de datos
-sqlite3* abrirBaseDatos(const char* nombre) {
-    sqlite3* db;
-    if (sqlite3_open(nombre, &db) != SQLITE_OK) {
-        cerr << "Error al abrir la base de datos: " << sqlite3_errmsg(db) << endl;
-        return nullptr;
-    }
-    return db;
-}
-
-// Función para ejecutar una consulta y mostrar el resultado
+// Función para ejecutar una consulta y mostrar el resultado con formato
 void consultarTabla(sqlite3* db, const char* tabla) {
     string sql = "SELECT * FROM ";
     sql += tabla;
@@ -22,17 +15,26 @@ void consultarTabla(sqlite3* db, const char* tabla) {
     if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, 0) == SQLITE_OK) {
         int colCount = sqlite3_column_count(stmt);
 
-        // Mostrar los nombres de las columnas
+        // Obtener los nombres de las columnas y calcular los anchos para alineación
+        vector<int> colWidths(colCount, 12); // Ajusta el ancho de cada columna si es necesario
         for (int i = 0; i < colCount; i++) {
-            cout << sqlite3_column_name(stmt, i) << "\t";
+            string colName = reinterpret_cast<const char*>(sqlite3_column_name(stmt, i));
+            colWidths[i] = max(colWidths[i], static_cast<int>(colName.length()));
+            cout << left << setw(colWidths[i]) << colName << " | ";
         }
         cout << endl;
 
-        // Ejecutar y mostrar cada fila
+        // Línea divisoria
+        for (int i = 0; i < colCount; i++) {
+            cout << string(colWidths[i], '-') << "-+-";
+        }
+        cout << endl;
+
+        // Ejecutar y mostrar cada fila con el mismo ancho de columna
         while (sqlite3_step(stmt) == SQLITE_ROW) {
             for (int i = 0; i < colCount; i++) {
                 const unsigned char* val = sqlite3_column_text(stmt, i);
-                cout << (val ? val : (const unsigned char*)"(NULL)") << "\t";
+                cout << left << setw(colWidths[i]) << (val ? reinterpret_cast<const char*>(val) : "(NULL)") << " | ";
             }
             cout << endl;
         }
@@ -50,12 +52,22 @@ int main() {
         // Habilitar claves foráneas
         sqlite3_exec(db, "PRAGMA foreign_keys = ON;", 0, 0, 0);
 
-        // Consultar la tabla 'Cuenta_Colones' para verificar su creación
-        cout << "Tabla Cuenta_Colones:" << endl;
+        // Consultar y mostrar las tablas 'Cuenta_Colones' y 'Cuenta_Dolares'
+        cout << "\nTabla Cuenta_Colones:" << endl;
         consultarTabla(db, "Cuenta_Colones");
+
+        cout << "Tabla Cuenta_Dolares:" << endl;
+        consultarTabla(db, "Cuenta_Dolares");
+
+        cout << "\nTabla Prestamos:" << endl;
+        consultarTabla(db, "Prestamos");
+
+        cout << "\nTabla Movimientos:" << endl;
+        consultarTabla(db, "Movimientos");
 
         sqlite3_close(db);
     }
 
     return 0;
 }
+
