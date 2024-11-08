@@ -5,6 +5,7 @@
 
 using namespace std;
 
+// Funcion que realiza consultas a las tablas 
 void consultarTabla(sqlite3* db, const char* tabla) {
     string sql = "SELECT * FROM ";
     sql += tabla;

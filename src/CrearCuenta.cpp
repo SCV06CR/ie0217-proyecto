@@ -8,6 +8,8 @@
 
 using namespace std;
 
+// Función para ejecutar comandos SQL sin retorno
+
 void ejecutarSQL(sqlite3* db, const char* sql) {
     char* mensajeError;
     if (sqlite3_exec(db, sql, 0, 0, &mensajeError) != SQLITE_OK) {
@@ -64,15 +66,17 @@ string leerPassword() {
     return Password;
 }
 
-
+// Genera el id random con un prefijo (100 colones, 200 dolares)
 int generarID(int prefijo) {
     return prefijo * 1000000 + rand() % 1000000;
 }
 
+// Genera el cvv el cual es de 3 digitos
 int generarCVV() {
     return rand() % 900 + 100; // Genera un número entre 100 y 999
 }
 
+// Insersion a las tablas
 void crearCuenta(sqlite3* db, const string& tabla, const string& nombre, const string& Password, int id, int cvv) {
     string hashedPassword = hashSHA256(Password);  // Hashear la contraseña
 
@@ -82,6 +86,7 @@ void crearCuenta(sqlite3* db, const string& tabla, const string& nombre, const s
     ejecutarSQL(db, sql.c_str());
 }
 
+// Gestiona la creacion de las cuentas
 void gestionarCreacionCuenta(sqlite3* db) {
     string nombre, Password;
     int opcion;
@@ -89,7 +94,7 @@ void gestionarCreacionCuenta(sqlite3* db) {
     cout << "Ingrese su nombre: ";
     getline(cin, nombre);
 
-    // Leer la contraseña y hacer el hash
+    // Leer la contraseña y hacer el hash llamando a leerPasword
     Password = leerPassword();
     while (Password.length() > 12) {
         cerr << "La contraseña es demasiado larga\n";
@@ -102,7 +107,7 @@ void gestionarCreacionCuenta(sqlite3* db) {
     cout << "2. Crear solo cuenta en Dolares\n";
     cout << "3. Crear ambas cuentas\n";
     cin >> opcion;
-    cin.ignore(); // Limpiar el buffer de entrada
+    cin.ignore(); // Limpiar el buffer 
 
     // Variables para ID y CVV
     int idColones, idDolares, cvvColones, cvvDolares;

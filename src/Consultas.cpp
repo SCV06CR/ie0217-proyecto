@@ -6,7 +6,9 @@
 #include "AbrirDB.hpp"
 using namespace std;
 
-// Función para ejecutar una consulta y mostrar el resultado con formato
+// ---------------Funcion extra para realizar consultas fuera del codigo main---------------
+
+// Función para ejecutar una consulta y mostrar el resultado con formato bonito xd
 void consultarTabla(sqlite3* db, const char* tabla) {
     string sql = "SELECT * FROM ";
     sql += tabla;
@@ -16,7 +18,7 @@ void consultarTabla(sqlite3* db, const char* tabla) {
         int colCount = sqlite3_column_count(stmt);
 
         // Obtener los nombres de las columnas y calcular los anchos para alineación
-        vector<int> colWidths(colCount, 12); // Ajusta el ancho de cada columna si es necesario
+        vector<int> colWidths(colCount, 12); 
         for (int i = 0; i < colCount; i++) {
             string colName = reinterpret_cast<const char*>(sqlite3_column_name(stmt, i));
             colWidths[i] = max(colWidths[i], static_cast<int>(colName.length()));
@@ -52,7 +54,7 @@ int main() {
         // Habilitar claves foráneas
         sqlite3_exec(db, "PRAGMA foreign_keys = ON;", 0, 0, 0);
 
-        // Consultar y mostrar las tablas 'Cuenta_Colones' y 'Cuenta_Dolares'
+        // Consultar y mostrar las tablas 'Cuenta_Colones', 'Cuenta_Dolares', 'Prestamos', 'Movimientos'
         cout << "\nTabla Cuenta_Colones:" << endl;
         consultarTabla(db, "Cuenta_Colones");
 

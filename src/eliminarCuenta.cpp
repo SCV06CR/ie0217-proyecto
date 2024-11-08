@@ -1,12 +1,14 @@
 #include <iostream>
 #include <sqlite3.h>
 #include <string>
-#include <openssl/sha.h>  // Necesita OpenSSL para SHA-256
+#include <openssl/sha.h>  
 #include <sstream>
 #include <iomanip>
 #include "AbrirDB.hpp"
 
 using namespace std;
+
+// Funcion para elimar cuentas creadas en las tablas de Cuenta_Colones o Cuenta_Dolares
 
 // Función para ejecutar comandos SQL sin retorno
 void ejecutarSQL(sqlite3* db, const char* sql) {
@@ -20,21 +22,21 @@ void ejecutarSQL(sqlite3* db, const char* sql) {
 }
 
 // Función para hacer hash de la contraseña usando SHA-256
-std::string hashSHA256(const std::string& input) {
+string hashSHA256(const string& input) {
     unsigned char hash[SHA256_DIGEST_LENGTH];
     SHA256(reinterpret_cast<const unsigned char*>(input.c_str()), input.size(), hash);
 
-    std::stringstream ss;
+    stringstream ss;
     for (int i = 0; i < SHA256_DIGEST_LENGTH; ++i) {
-        ss << std::hex << std::setw(2) << std::setfill('0') << (int)hash[i];
+        ss << hex << setw(2) << setfill('0') << (int)hash[i];
     }
     return ss.str();
 }
 
 // Función para verificar si una cuenta existe y si la contraseña es correcta
-bool cuentaValida(sqlite3* db, const std::string& tabla, int id, const std::string& Password) {
-    std::string hashedPassword = hashSHA256(Password);
-    std::string sql = "SELECT COUNT(*) FROM " + tabla + " WHERE id = " + std::to_string(id) + " AND Password = '" + hashedPassword + "';";
+bool cuentaValida(sqlite3* db, const string& tabla, int id, const string& Password) {
+    string hashedPassword = hashSHA256(Password);
+    string sql = "SELECT COUNT(*) FROM " + tabla + " WHERE id = " + to_string(id) + " AND Password = '" + hashedPassword + "';";
     sqlite3_stmt* stmt;
     bool esValida = false;
 
@@ -79,7 +81,7 @@ void borrarCuenta(sqlite3* db) {
     }
 
     // Borrar la cuenta si la verificación es exitosa
-    std::string sql = "DELETE FROM " + tabla + " WHERE id = " + std::to_string(id) + ";";
+    string sql = "DELETE FROM " + tabla + " WHERE id = " + to_string(id) + ";";
     ejecutarSQL(db, sql.c_str());
 
     cout << "Cuenta con ID " << id << " eliminada de " << tabla << "." << endl;

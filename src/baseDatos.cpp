@@ -82,17 +82,6 @@ void crearTablas(sqlite3* db) {
 }
 
 
-// Función de hash para simular la encriptación de la contraseña (simulación)
-string hashContraseña(const string& contraseña) {
-    return "hashed_" + contraseña;  // Esta función debería reemplazarse con un hash real en producción
-}
-
-// Función para insertar una contraseña encriptada en la tabla especificada
-void insertarContraseña(sqlite3* db, const string& tabla, int id, const string& contraseña) {
-    string hashedContraseña = hashContraseña(contraseña); // Encriptamos la contraseña
-    string sql = "UPDATE " + tabla + " SET password = '" + hashedContraseña + "' WHERE id = " + to_string(id) + ";";
-    ejecutarSQL(db, sql.c_str());
-}
 
 int main() {
     // Abrir la base de datos
@@ -104,11 +93,6 @@ int main() {
         
         // Crear las tablas
         crearTablas(db);
-
-        // Ejemplo de inserción de una contraseña encriptada para una cuenta en Cuenta_Colones
-        int idCuenta = 1;  // ID de la cuenta para el ejemplo
-        string contraseña = "mi_contraseña_secreta";
-        insertarContraseña(db, "Cuenta_Colones", idCuenta, contraseña);
 
         // Cerrar la base de datos
         sqlite3_close(db);
