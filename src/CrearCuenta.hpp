@@ -5,8 +5,18 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
-#include <conio.h>  // Librería para capturar la entrada sin eco en Windows
 #include <ctime>
+
+// Biblioteca de Windows conio.h, En caso de usar Unix utiliza termios.h y unistd.h
+
+#ifdef _WIN32
+    #include <conio.h> 
+#else
+    #include <termios.h> 
+    #include <unistd.h>
+#endif
+
+
 using namespace std;
 
 // Función para ejecutar comandos SQL sin retorno

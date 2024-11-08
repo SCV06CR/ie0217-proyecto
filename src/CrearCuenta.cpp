@@ -18,22 +18,49 @@ void ejecutarSQL(sqlite3* db, const char* sql) {
     }
 }
 
+// Esta funcion lee la contrasena que este ingresando y la oculta (Unix y Windows trabajan con bibliotecas distintas)
+
 string leerPassword() {
     string Password;
     char ch;
 
-    cout << "Ingrese una password para su cuenta (Esta aparece oculta y puede contener letras y numeros en un maximo de 12 caracteres): ";
-    while ((ch = _getch()) != '\r') { // Captura caracteres hasta que presione "Enter"
-        if (ch == '\b' && !Password.empty()) { // Permite borrar un carácter
-            Password.pop_back();
-            cout << "\b \b"; // Borra visualmente en consola
-        } else if (ch != '\b') {
-            Password.push_back(ch);
+    cout << "Ingrese su Password (oculta): ";
+    
+#ifdef _WIN32
+    // Windows
+    while ((ch = _getch()) != '\r') { // '\r' representa Enter en Windows
+        if (ch == '\b') { // Maneja backspace
+            if (!Password.empty()) {
+                cout << "\b \b"; // Borra el último carácter
+                Password.pop_back();
+            }
+        } else {
+            Password += ch;
             cout << '*'; // Muestra un asterisco en lugar del carácter
         }
     }
-    cout << endl;
+#else
+    // Unix/Linux
+    termios oldt, newt;
+    tcgetattr(STDIN_FILENO, &oldt);
+    newt = oldt;
+    newt.c_lflag &= ~ECHO;
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
 
+    while ((ch = getchar()) != '\n') {
+        if (ch == 127 || ch == '\b') { // Maneja backspace
+            if (!Password.empty()) {
+                cout << "\b \b";
+                Password.pop_back();
+            }
+        } else {
+            Password += ch;
+            cout << '*';
+        }
+    }
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+#endif
+    cout << endl;
     return Password;
 }
 
