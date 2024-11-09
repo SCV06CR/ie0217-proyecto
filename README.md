@@ -90,6 +90,22 @@ Concluida la sección teórica, se detalla el diseño que el programa de gestió
 ## Cronograma de actividades
 ![Cronograma de Actividades](imagenes/Cronograma.jpg)
 
+## Bitácora:
+
+| Fecha | Persona | Aporte |
+|-----------|-----------|-----------|
+| 01/10/24    | Rodrigo Sánchez Araya   |Creación del main. Se agrega función para establecer tipo de cambio CRC/USD   |
+| 05/10/24    | Rodrigo Sánchez Araya    | Firmado de funciones para Atencion Cliente. Se agrega display del menú principal. Agregar archivo de implementación de funciones.   |
+| 08/10/24  | Rodrigo Sánchez Araya   | Se agrega un menú para las funciones de atención al cliente (Se agrega al main) . Se agrega implementación de las funciones de Depósito, Retiro, Transferencia, Salida del país, Consulta Pin, Consulta CVV.  |
+|     |     |     |
+|    |    |    |
+|    |    |    |
+|    |    |    |
+|     |     |     |
+|     |     |     |
+
+
+
 ### Referencias 
 
 1. Billin. (2018). Simulador de préstamos personales y empresas - Calculadora Billin. https://www.billin.net/simulador-prestamos-personales-calculadora/
