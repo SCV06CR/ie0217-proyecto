@@ -10,7 +10,7 @@
 #include "CrearCuenta.hpp"
 #include "Verificacion.hpp" 
 #include "ConsultaDB.hpp"
-
+#include "AtencionCliente.hpp"
 using namespace std;
 
 int main() {
@@ -65,7 +65,8 @@ int main() {
 
                     switch (opcion1) {
                         case 1:
-                            cout << "\nAquí se desplegará el menú de Atención al cliente\n" << endl;
+                            cout << "Ingresando al menú de atención al cliente..." << endl;
+                            showMenuAC(id, TipoCambio, db);
                             break;
                         case 2:
                             cout << "\nAquí se desplegará el menú de info de préstamos\n" << endl;
