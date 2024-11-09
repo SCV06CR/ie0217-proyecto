@@ -31,14 +31,12 @@ bool cuentaValida(sqlite3* db, const string& tabla, int id, const string& Passwo
 // Función para verificar una cuenta en ambas tablas
 bool verificarCuenta(sqlite3* db, int id, const string& password) {
 
-
     // Bucle para solicitar el ID hasta que tenga 9 dígitos
     while (to_string(id).length() != 9) {
         cerr << "Error: El ID debe tener exactamente 9 dígitos." << endl;
         cout << "Por favor, ingrese un ID válido de 9 dígitos: ";
         cin >> id;
     }
-
 
     // Verificar en la tabla de Cuenta_Colones
     if (cuentaValida(db, "Cuenta_Colones", id, password)) {

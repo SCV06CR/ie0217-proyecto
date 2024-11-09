@@ -19,7 +19,7 @@ int main() {
     double TipoCambioMin = 520.0;
     double TipoCambioMax = 537.5;
     double TipoCambio = generarTipoCambio(TipoCambioMin, TipoCambioMax);
-    double TipoCambio = generarTipoCambio(TipoCambioMin, TipoCambioMax);
+
     // Abrir la base de datos
     sqlite3* db = abrirBaseDatos("SistemaBancario.db");
 
