@@ -1,7 +1,4 @@
-#include <iostream>
-#include <sqlite3.h>
-#include <string>
-using namespace std;
+#include "baseDatos.hpp"
 
 // Función para ejecutar comandos SQL sin retorno
 void ejecutarSQL(sqlite3* db, const char* sql) {
@@ -26,6 +23,12 @@ sqlite3* abrirBaseDatos(const char* nombre) {
 
 // Función para crear las tablas de la base de datos
 void crearTablas(sqlite3* db) {
+
+    if (db) {
+    
+    // Habilitar claves foráneas
+    sqlite3_exec(db, "PRAGMA foreign_keys = ON;", 0, 0, 0);
+
     // Tabla de Cuenta Colones
     const char* sqlCuentaColones = R"(
         CREATE TABLE IF NOT EXISTS Cuenta_Colones (
@@ -62,13 +65,27 @@ void crearTablas(sqlite3* db) {
     )";
 
     // Tabla de Préstamos
-    const char* sqlPrestamos = R"(
+    const char* sqlPrestamosColones = R"(
         CREATE TABLE IF NOT EXISTS Prestamos (
             id_prestamo INTEGER PRIMARY KEY CHECK(id_prestamo BETWEEN 0 AND 999999) NOT NULL,
             id_cuenta INTEGER NOT NULL,
             intereses INTEGER NOT NULL,
             meses INTEGER NOT NULL,
             monto INTEGER NOT NULL,
+            tipo_prestamo TEXT NOT NULL,
+            cuotas_pagadas INTEGER NOT NULL CHECK(cuotas_pagadas >= 0),
+            FOREIGN KEY (id_cuenta) REFERENCES Cuenta_Colones(id) ON DELETE CASCADE
+        );
+    )";
+
+    const char* sqlPrestamosDolares = R"(
+        CREATE TABLE IF NOT EXISTS Prestamos (
+            id_prestamo INTEGER PRIMARY KEY CHECK(id_prestamo BETWEEN 0 AND 999999) NOT NULL,
+            id_cuenta INTEGER NOT NULL,
+            intereses INTEGER NOT NULL,
+            meses INTEGER NOT NULL,
+            monto INTEGER NOT NULL,
+            tipo_prestamo TEXT NOT NULL,
             cuotas_pagadas INTEGER NOT NULL CHECK(cuotas_pagadas >= 0),
             FOREIGN KEY (id_cuenta) REFERENCES Cuenta_Colones(id) ON DELETE CASCADE
         );
@@ -78,25 +95,8 @@ void crearTablas(sqlite3* db) {
     ejecutarSQL(db, sqlCuentaColones);
     ejecutarSQL(db, sqlCuentaDolares);
     ejecutarSQL(db, sqlMovimientos);
-    ejecutarSQL(db, sqlPrestamos);
-}
+    ejecutarSQL(db, sqlPrestamosColones);
+    ejecutarSQL(db, sqlPrestamosDolares);
 
-
-
-int main() {
-    // Abrir la base de datos
-    sqlite3* db = abrirBaseDatos("SistemaBancario.db");
-
-    if (db) {
-        // Habilitar claves foráneas
-        ejecutarSQL(db, "PRAGMA foreign_keys = ON;");
-        
-        // Crear las tablas
-        crearTablas(db);
-
-        // Cerrar la base de datos
-        sqlite3_close(db);
     }
-
-    return 0;
 }
