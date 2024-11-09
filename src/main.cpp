@@ -11,6 +11,7 @@
 #include "Verificacion.hpp" 
 #include "ConsultaDB.hpp"
 #include "AtencionCliente.hpp"
+
 using namespace std;
 
 int main() {
@@ -18,10 +19,10 @@ int main() {
     double TipoCambioMin = 520.0;
     double TipoCambioMax = 537.5;
     double TipoCambio = generarTipoCambio(TipoCambioMin, TipoCambioMax);
-
-     double TipoCambio = generarTipoCambio(TipoCambioMin, TipoCambioMax);
+    double TipoCambio = generarTipoCambio(TipoCambioMin, TipoCambioMax);
     // Abrir la base de datos
     sqlite3* db = abrirBaseDatos("SistemaBancario.db");
+
     do {
         cout << "-----------------------------------------------------------------------------" << endl;
         cout << "|                     Bienvenido al Sistema en ventanilla                   |" << endl;
@@ -85,6 +86,8 @@ int main() {
                             cout << "\nOpción inválida...\nPor favor intente de nuevo.\n" << endl;
                     }
                 } while (opcion1 != 3);
+                break;
+            }   
             case 2:
                 gestionarCreacionCuenta(db);
                 cout << "\nConsultando las tablas después de crear la cuenta:\n";
@@ -95,18 +98,7 @@ int main() {
                 break;
             case 3:
                 cout << "\nSaliendo del programa...\nGracias por su visita." << endl;
-            }
-            case 2:
-                gestionarCreacionCuenta(db);
-                cout << "\nConsultando las tablas después de crear la cuenta:\n";
-                cout << "\nTabla Cuenta_Colones:" << endl;
-                consultarTabla(db, "Cuenta_Colones");
-                cout << "\nTabla Cuenta_Dolares:" << endl;
-                consultarTabla(db, "Cuenta_Dolares");
-                break;
-            case 3:
-                cout << "\nSaliendo del programa...\nGracias por su visita." << endl;
-                break;
+                
             default:
                 cout << "\nOpción inválida...\nPor favor ingrese una opción correcta.\n\n";
                 break;
@@ -117,6 +109,7 @@ int main() {
     sqlite3_close(db);
     return 0;
 }
+
 
 
 
