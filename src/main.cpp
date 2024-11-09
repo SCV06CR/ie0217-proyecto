@@ -11,6 +11,7 @@
 #include "Verificacion.hpp" 
 #include "ConsultaDB.hpp"
 #include "AtencionCliente.hpp"
+#include "InformacionPrestamos.hpp"
 
 using namespace std;
 
@@ -22,6 +23,9 @@ int main() {
 
     // Abrir la base de datos
     sqlite3* db = abrirBaseDatos("SistemaBancario.db");
+
+    // Crear las tablas
+    crearTablas(db);
 
     do {
         cout << "-----------------------------------------------------------------------------" << endl;
@@ -75,7 +79,8 @@ int main() {
                             break;
 
                         case 2:
-                            cout << "\nAquí se desplegará el menú de info de préstamos\n" << endl;
+                            cout << "Ingresando al menú de solicitud de prestamo..." << endl;
+                            gestionarPrestamo(db, id);
                             break;
 
                         case 3:
