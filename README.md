@@ -94,10 +94,14 @@ Concluida la sección teórica, se detalla el diseño que el programa de gestió
 
 | Fecha | Persona | Aporte |
 |-----------|-----------|-----------|
-| 01/10/24    | Rodrigo Sánchez Araya   |Creación del main. Se agrega función para establecer tipo de cambio CRC/USD   |
-| 05/10/24    | Rodrigo Sánchez Araya    | Firmado de funciones para Atencion Cliente. Se agrega display del menú principal. Agregar archivo de implementación de funciones.   |
-| 08/10/24  | Rodrigo Sánchez Araya   | Se agrega un menú para las funciones de atención al cliente (Se agrega al main) . Se agrega implementación de las funciones de Depósito, Retiro, Transferencia, Salida del país, Consulta Pin, Consulta CVV.  |
-|     |     |     |
+| 01/11/24  | Rodrigo Sánchez Araya   |Creación del main. Se agrega función para establecer tipo de cambio CRC/USD   |
+| 03/11/24  | Sergio Castillo Víquez    | Creación de base de datos con las cuatro tablas correspondiente a la cuenta en colones, cuenta en dólares, movimientos y préstamos   |
+| 05/11/24  | Rodrigo Sánchez Araya    | Firmado de funciones para Atencion Cliente. Se agrega display del menú principal. Agregar archivo de implementación de funciones.   |
+| 07/11/24  | Sergio Castillo Víquez   | Creación de funciones para la creación de cuentas, función de hasheo para las contraseñas de las cuentas (OpenSSL), función para abrir la base de datos, función para la consulta de las tablas en la DB, función para la verificación de una cuenta y función de eliminación de cuentas |
+| 07/11/24  | Sergio Castillo Víquez   | Implementación de las funciones al main en las opciones de crear una cuenta e ingresar al sistema |
+| 08/11/24  | Sergio Castillo Víquez   | Actualizaciones en múltiples funciones para aumentar su documentación y cambios menores |
+| 08/11/24  | Rodrigo Sánchez Araya   | Se agrega un menú para las funciones de atención al cliente (Se agrega al main) . Se agrega implementación de las funciones de Depósito, Retiro, Transferencia, Salida del país, Consulta Pin, Consulta CVV.  |
+|   |    |     |
 |    |    |    |
 |    |    |    |
 |    |    |    |
