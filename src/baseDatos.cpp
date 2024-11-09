@@ -11,16 +11,6 @@ void ejecutarSQL(sqlite3* db, const char* sql) {
     }
 }
 
-// Función para abrir la base de datos
-sqlite3* abrirBaseDatos(const char* nombre) {
-    sqlite3* db;
-    if (sqlite3_open(nombre, &db) != SQLITE_OK) {
-        cerr << "Error al abrir la base de datos: " << sqlite3_errmsg(db) << endl;
-        return nullptr;
-    }
-    return db;
-}
-
 // Función para crear las tablas de la base de datos
 void crearTablas(sqlite3* db) {
 
@@ -66,7 +56,7 @@ void crearTablas(sqlite3* db) {
 
     // Tabla de Préstamos
     const char* sqlPrestamosColones = R"(
-        CREATE TABLE IF NOT EXISTS Prestamos (
+        CREATE TABLE IF NOT EXISTS Prestamos_Colones (
             id_prestamo INTEGER PRIMARY KEY CHECK(id_prestamo BETWEEN 0 AND 999999) NOT NULL,
             id_cuenta INTEGER NOT NULL,
             intereses INTEGER NOT NULL,
@@ -79,7 +69,7 @@ void crearTablas(sqlite3* db) {
     )";
 
     const char* sqlPrestamosDolares = R"(
-        CREATE TABLE IF NOT EXISTS Prestamos (
+        CREATE TABLE IF NOT EXISTS Prestamos_Dolares (
             id_prestamo INTEGER PRIMARY KEY CHECK(id_prestamo BETWEEN 0 AND 999999) NOT NULL,
             id_cuenta INTEGER NOT NULL,
             intereses INTEGER NOT NULL,
@@ -87,7 +77,7 @@ void crearTablas(sqlite3* db) {
             monto INTEGER NOT NULL,
             tipo_prestamo TEXT NOT NULL,
             cuotas_pagadas INTEGER NOT NULL CHECK(cuotas_pagadas >= 0),
-            FOREIGN KEY (id_cuenta) REFERENCES Cuenta_Colones(id) ON DELETE CASCADE
+            FOREIGN KEY (id_cuenta) REFERENCES Cuenta_Dolares(id) ON DELETE CASCADE
         );
     )";
 
