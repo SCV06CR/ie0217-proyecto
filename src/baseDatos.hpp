@@ -3,7 +3,7 @@
 
 #include <sqlite3.h>
 #include <iostream>
-#include <sqlite3.h>
+
 using namespace std;
 
 // Funcion que ejecuta consultas sin retorno

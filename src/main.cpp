@@ -19,9 +19,9 @@ int main() {
     double TipoCambioMax = 537.5;
     double TipoCambio = generarTipoCambio(TipoCambioMin, TipoCambioMax);
 
+     double TipoCambio = generarTipoCambio(TipoCambioMin, TipoCambioMax);
     // Abrir la base de datos
     sqlite3* db = abrirBaseDatos("SistemaBancario.db");
-
     do {
         cout << "-----------------------------------------------------------------------------" << endl;
         cout << "|                     Bienvenido al Sistema en ventanilla                   |" << endl;
@@ -40,7 +40,7 @@ int main() {
         cout << "|---------------------------------------------------------------------------|" << endl;
         cin >> option;
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
+    
         switch (option) {
             case 1: {
                 int id;
@@ -48,6 +48,7 @@ int main() {
 
                 cout << "Ingrese el ID de la cuenta: ";
                 cin >> id;
+
                 cin.ignore();
                 cout << "Ingrese su Password: ";
                 getline(cin, password);
@@ -57,28 +58,43 @@ int main() {
                 }
 
                 int opcion1;
-                do {
+                
+                 do {
                     cout << "Ingrese el servicio que desea recibir: " << endl;
                     cout << "1. Atención al cliente.\n2. Información general sobre Préstamos.\n3. Devolverse" << endl;
+
                     cout << "Ingrese su selección: ";
                     cin >> opcion1;
 
                     switch (opcion1) {
+
                         case 1:
                             cout << "Ingresando al menú de atención al cliente..." << endl;
                             showMenuAC(id, TipoCambio, db);
                             break;
+
                         case 2:
                             cout << "\nAquí se desplegará el menú de info de préstamos\n" << endl;
                             break;
+
                         case 3:
                             cout << "\nAquí se devuelve al menú anterior" << endl;
                             break;
-                        default:
+
+                         default:
                             cout << "\nOpción inválida...\nPor favor intente de nuevo.\n" << endl;
                     }
                 } while (opcion1 != 3);
+            case 2:
+                gestionarCreacionCuenta(db);
+                cout << "\nConsultando las tablas después de crear la cuenta:\n";
+                cout << "\nTabla Cuenta_Colones:" << endl;
+                consultarTabla(db, "Cuenta_Colones");
+                cout << "\nTabla Cuenta_Dolares:" << endl;
+                consultarTabla(db, "Cuenta_Dolares");
                 break;
+            case 3:
+                cout << "\nSaliendo del programa...\nGracias por su visita." << endl;
             }
             case 2:
                 gestionarCreacionCuenta(db);
@@ -93,6 +109,7 @@ int main() {
                 break;
             default:
                 cout << "\nOpción inválida...\nPor favor ingrese una opción correcta.\n\n";
+                break;
         }
 
     } while (option != 3);
@@ -101,11 +118,6 @@ int main() {
     return 0;
 }
 
-
-
-
-
- 
 
 
  
