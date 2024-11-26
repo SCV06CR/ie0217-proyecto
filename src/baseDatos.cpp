@@ -43,16 +43,27 @@ void crearTablas(sqlite3* db) {
         );
     )";
 
-    // Tabla de Movimientos
-    const char* sqlMovimientos = R"(
-        CREATE TABLE IF NOT EXISTS Movimientos (
-            id INTEGER NOT NULL,
-            tipo_movimiento TEXT CHECK(tipo_movimiento IN ('Transferencia', 'Deposito', 'Retiro')),
-            monto INTEGER NOT NULL CHECK(monto > 0),
-            fecha TEXT DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (id) REFERENCES Cuenta_Colones(id) ON DELETE CASCADE
+    // Tabla de Movimientos de cuentas en colones
+    // El id INTEGER puede ser cualquiera de los dos tipos de id de colones o dólares. 
+    const char* sqlMovimientosColones = R"(
+        CREATE TABLE IF NOT EXISTS Movimientos_Colones (
+            id_cuenta INTEGER NOT NULL, -- Clave foránea a la tabla de cuentas
+            detalle TEXT NOT NULL, -- Descripción de lo que se hizo
+            fecha TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL, -- Fecha del movimiento
+            FOREIGN KEY (id_cuenta) REFERENCES Cuenta_Colones(id) ON DELETE CASCADE
         );
     )";
+   // Tabla de Movimientos de cuentas en dolares
+    // El id INTEGER puede ser cualquiera de los dos tipos de id de colones o dólares. 
+    const char* sqlMovimientosdolares = R"(
+        CREATE TABLE IF NOT EXISTS Movimientos_dolares (
+            id_cuenta INTEGER NOT NULL, -- Clave foránea a la tabla de cuentas
+            detalle TEXT NOT NULL, -- Descripción de lo que se hizo
+            fecha TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL, -- Fecha del movimiento
+            FOREIGN KEY (id_cuenta) REFERENCES Cuenta_Colones(id) ON DELETE CASCADE
+        );
+    )";
+
 
     // Tabla de Préstamos
     const char* sqlPrestamosColones = R"(
@@ -64,7 +75,7 @@ void crearTablas(sqlite3* db) {
             monto INTEGER NOT NULL,
             tipo_prestamo TEXT NOT NULL,
             cuotas_pagadas INTEGER NOT NULL CHECK(cuotas_pagadas >= 0),
-            FOREIGN KEY (id_cuenta) REFERENCES Cuenta_Colones(id) ON DELETE CASCADE
+            FOREIGN KEY (id_cuenta) REFERENCES Cuenta_Dolares(id) ON DELETE CASCADE
         );
     )";
 
@@ -84,7 +95,8 @@ void crearTablas(sqlite3* db) {
     // Crear las tablas
     ejecutarSQL(db, sqlCuentaColones);
     ejecutarSQL(db, sqlCuentaDolares);
-    ejecutarSQL(db, sqlMovimientos);
+    ejecutarSQL(db, sqlMovimientosColones);
+    ejecutarSQL(db, sqlMovimientosdolares);
     ejecutarSQL(db, sqlPrestamosColones);
     ejecutarSQL(db, sqlPrestamosDolares);
 
