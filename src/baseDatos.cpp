@@ -76,7 +76,7 @@ void crearTablas(sqlite3* db) {
             tipo_prestamo TEXT NOT NULL,
             monto_por_cuota FLOAT NOT NULL,
             cuotas_pagadas INTEGER NOT NULL CHECK(cuotas_pagadas >= 0),
-            FOREIGN KEY (id_cuenta) REFERENCES Cuenta_Dolares(id) ON DELETE CASCADE
+            FOREIGN KEY (id_cuenta) REFERENCES Cuenta_Colones(id) ON DELETE CASCADE
         );
     )";
 
@@ -90,6 +90,7 @@ void crearTablas(sqlite3* db) {
             tipo_prestamo TEXT NOT NULL,
             monto_por_cuota FLOAT NOT NULL,
             cuotas_pagadas INTEGER NOT NULL CHECK(cuotas_pagadas >= 0),
+            cuotas_pendientes INTEGER NOT NULL CHECK(cuotas_pagadas >= 0),
             FOREIGN KEY (id_cuenta) REFERENCES Cuenta_Dolares(id) ON DELETE CASCADE
         );
     )";
