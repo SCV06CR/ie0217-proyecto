@@ -10,7 +10,7 @@ using namespace std;
 void realizadDeposito(const int& id, sqlite3* db);
 void realizadRetiro(const int& id, sqlite3* db);
 void realizadTransferencia(const int& idOrigen, const int& idDestino, const double& TipoCambio, sqlite3* db);
-void realizarAbono(const int& idPrestamo, const int& idCuenta, sqlite3* db);
+void realizarAbono(const int& idPrestamo, const double* tipoCambio, const int& idCuenta, sqlite3* db);
 void pagarCuota(const int& idPrestamo, const int& idCuenta, sqlite3* db);
 void registrarSalidaPais(const int& idCuenta, sqlite3* db);
 void consultarPin(const int& idCuenta, sqlite3* db);

@@ -162,19 +162,19 @@ void realizadTransferencia(const int& idOrigen, const int& idDestino, const doub
     int dolares = 200; 
     double transfer; 
     string idOrig = std::to_string(idOrigen); // Convertir a string
-    std::string idDest = std::to_string(idDestino); //convertir a string
-    std::string digOrig = idOrig.substr(0, 3); // extraer los primeros 3 caracteres
-    std::string digDest = idDest.substr(0, 3); // Extraer los primeros 3 caracteres
+    string idDest = std::to_string(idDestino); //convertir a string
+    string digOrig = idOrig.substr(0, 3); // extraer los primeros 3 caracteres
+    string digDest = idDest.substr(0, 3); // Extraer los primeros 3 caracteres
 
-    std::cout << "Ingrese la cantidad de dinero que desea transferir." << std::endl;
-    std::cin >> transfer; 
+    cout << "Ingrese la cantidad de dinero que desea transferir." << std::endl;
+    cin >> transfer; 
 
     // Definiendo consulta SQL según el tipo de cuenta
-    std::string query;
+    string query;
 
     if (std::stoi(digOrig) == colones && std::stoi(digDest) == colones) {
         // Comprobar que la cuenta de origen no quede en negativo
-        std::string checkQuery = "SELECT cantidad_dinero FROM Cuenta_Clones WHERE id = ?";
+        string checkQuery = "SELECT cantidad_dinero FROM Cuenta_Clones WHERE id = ?";
         sqlite3_stmt* checkStmt;
         sqlite3_prepare_v2(db, checkQuery.c_str(), -1, &checkStmt, 0);
         sqlite3_bind_text(checkStmt, 1, idOrig.c_str(), -1, SQLITE_STATIC);
@@ -293,11 +293,143 @@ void realizadTransferencia(const int& idOrigen, const int& idDestino, const doub
 // El segundo const id es de la cuenta
 // se recibe el monto para abonar
 // Recibe la base de datos donde existe la cuenta y el préstamo.
-void realizarAbono(const int& idPrestamo, const int& idCuenta, sqlite3* db){
-    cout << "Todavía falta de implementar" << endl;
-    // de momento esta funion queda asi porque no se ha implementado la parte de prestamos
-}
+void realizarAbono(const int& idPrestamo, const double& tipoCambio, const int& idCuenta, sqlite3* db) {
+    // Determinar el tipo de cuenta según el prefijo del ID
+    string idCuentaStr = to_string(idCuenta);
+    string cuentaPrefix = idCuentaStr.substr(0, 3);
 
+    int cuentaEsColones = (cuentaPrefix == "100");
+    int cuentaEsDolares = (cuentaPrefix == "200");
+
+    // Consultar el tipo de préstamo (colones o dólares)
+    string queryPrestamo;
+    if (cuentaEsColones) {
+        queryPrestamo = "SELECT monto, cuotas_pagadas FROM Prestamos_Colones WHERE id_prestamo = ?";
+    } else if (cuentaEsDolares) {
+        queryPrestamo = "SELECT monto, cuotas_pagadas FROM Prestamos_Dolares WHERE id_prestamo = ?";
+    } else {
+        cerr << "El ID de la cuenta no corresponde a un tipo válido." << endl;
+        return;
+    }
+
+    double montoRestante;
+    int cuotasPagadas;
+
+    sqlite3_stmt* stmtPrestamo;
+    if (sqlite3_prepare_v2(db, queryPrestamo.c_str(), -1, &stmtPrestamo, 0) != SQLITE_OK) {
+        cerr << "Error al preparar la consulta del préstamo: " << sqlite3_errmsg(db) << endl;
+        return;
+    }
+    sqlite3_bind_int(stmtPrestamo, 1, idPrestamo);
+
+    if (sqlite3_step(stmtPrestamo) == SQLITE_ROW) {
+        montoRestante = sqlite3_column_double(stmtPrestamo, 0);
+        cuotasPagadas = sqlite3_column_int(stmtPrestamo, 1);
+    } else {
+        cerr << "No se encontró el préstamo con ID " << idPrestamo << endl;
+        sqlite3_finalize(stmtPrestamo);
+        return;
+    }
+    sqlite3_finalize(stmtPrestamo);
+
+    // Consultar el saldo de la cuenta
+    string querySaldoCuenta = cuentaEsColones
+        ? "SELECT cantidad_dinero FROM Cuenta_Colones WHERE id = ?"
+        : "SELECT cantidad_dinero FROM Cuenta_Dolares WHERE id = ?";
+    double saldoCuenta;
+
+    sqlite3_stmt* stmtCuenta;
+    if (sqlite3_prepare_v2(db, querySaldoCuenta.c_str(), -1, &stmtCuenta, 0) != SQLITE_OK) {
+        cerr << "Error al preparar la consulta de saldo de cuenta: " << sqlite3_errmsg(db) << endl;
+        return;
+    }
+    sqlite3_bind_int(stmtCuenta, 1, idCuenta);
+
+    if (sqlite3_step(stmtCuenta) == SQLITE_ROW) {
+        saldoCuenta = sqlite3_column_double(stmtCuenta, 0);
+    } else {
+        cerr << "No se encontró la cuenta con ID " << idCuenta << endl;
+        sqlite3_finalize(stmtCuenta);
+        return;
+    }
+    sqlite3_finalize(stmtCuenta);
+
+    // Solicitar el monto a abonar
+    double montoAbono;
+    cout << "Ingrese el monto que desea abonar: ";
+    cin >> montoAbono;
+
+    // Validar y realizar el abono
+    if (cuentaEsColones && montoRestante > 0) {
+        // La cuenta y el préstamo están en colones
+        if (saldoCuenta - montoAbono < 1) {
+            cerr << "No se puede realizar el abono. La cuenta no puede quedar con saldo menor que 1." << endl;
+            return;
+        }
+    } else if (cuentaEsDolares && montoRestante > 0) {
+        // La cuenta y el préstamo están en dólares
+        if (saldoCuenta - montoAbono < 1) {
+            cerr << "No se puede realizar el abono. La cuenta no puede quedar con saldo menor que 1." << endl;
+            return;
+        }
+    } else if (cuentaEsDolares && montoRestante > 0) {
+        // Conversión de dólares a colones
+        double montoConvertido = montoAbono * (tipoCambio);
+        if (saldoCuenta - montoConvertido < 1) {
+            cerr << "No se puede realizar el abono. La cuenta no puede quedar con saldo menor que 1 después de la conversión." << endl;
+            return;
+        }
+        montoAbono = montoConvertido;
+    } else if (cuentaEsColones && montoRestante > 0) {
+        // Conversión de colones a dólares
+        double montoConvertido = montoAbono / (tipoCambio);
+        if (saldoCuenta - montoConvertido < 1) {
+            cerr << "No se puede realizar el abono. La cuenta no puede quedar con saldo menor que 1 después de la conversión." << endl;
+            return;
+        }
+        montoAbono = montoConvertido;
+    }
+
+    // Actualizar saldo de la cuenta
+    string queryUpdateCuenta = cuentaEsColones
+        ? "UPDATE Cuenta_Colones SET cantidad_dinero = cantidad_dinero - ? WHERE id = ?"
+        : "UPDATE Cuenta_Dolares SET cantidad_dinero = cantidad_dinero - ? WHERE id = ?";
+    sqlite3_stmt* stmtUpdateCuenta;
+    if (sqlite3_prepare_v2(db, queryUpdateCuenta.c_str(), -1, &stmtUpdateCuenta, 0) != SQLITE_OK) {
+        cerr << "Error al preparar la consulta de actualización de cuenta: " << sqlite3_errmsg(db) << endl;
+        return;
+    }
+    sqlite3_bind_double(stmtUpdateCuenta, 1, montoAbono);
+    sqlite3_bind_int(stmtUpdateCuenta, 2, idCuenta);
+
+    if (sqlite3_step(stmtUpdateCuenta) != SQLITE_DONE) {
+        cerr << "Error al ejecutar la actualización de la cuenta: " << sqlite3_errmsg(db) << endl;
+        sqlite3_finalize(stmtUpdateCuenta);
+        return;
+    }
+    sqlite3_finalize(stmtUpdateCuenta);
+
+    // Actualizar monto restante del préstamo
+    string queryUpdatePrestamo = cuentaEsColones
+        ? "UPDATE Prestamos_Colones SET monto = monto - ? WHERE id_prestamo = ?"
+        : "UPDATE Prestamos_Dolares SET monto = monto - ? WHERE id_prestamo = ?";
+    sqlite3_stmt* stmtUpdatePrestamo;
+    if (sqlite3_prepare_v2(db, queryUpdatePrestamo.c_str(), -1, &stmtUpdatePrestamo, 0) != SQLITE_OK) {
+        cerr << "Error al preparar la consulta de actualización del préstamo: " << sqlite3_errmsg(db) << endl;
+        return;
+    }
+    sqlite3_bind_double(stmtUpdatePrestamo, 1, montoAbono);
+    sqlite3_bind_int(stmtUpdatePrestamo, 2, idPrestamo);
+
+    if (sqlite3_step(stmtUpdatePrestamo) != SQLITE_DONE) {
+        cerr << "Error al ejecutar la actualización del préstamo: " << sqlite3_errmsg(db) << endl;
+        sqlite3_finalize(stmtUpdatePrestamo);
+        return;
+    }
+    sqlite3_finalize(stmtUpdatePrestamo);
+
+    cout << "Abono realizado con éxito. Monto descontado: " << montoAbono << ". Préstamo actualizado correctamente." << endl;
+}
 
 // El primer const id es del préstamo
 // El segundo const id es de la cuenta
@@ -468,7 +600,7 @@ string showMenuAC(const int& idCuenta, const double& TipoCambio, sqlite3* db) {
             case 4:
                 cout << "Ingrese el número de depósito" << endl;
                 cin >> idPrestamo;
-                realizarAbono(idPrestamo, idCuenta, db);
+                realizarAbono(idPrestamo, TipoCambio, idCuenta,  db);
                 break;
             case 5:
                 cout << "Ingrese el número de depósito" << endl;
