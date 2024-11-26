@@ -1,12 +1,9 @@
 #include "AtencionCliente.hpp"
 #include <regex>
 #include<string>
+#include <iomanip>
 using namespace std; 
-/*
-************************************************
-*Falta hacer la implementacion de las funciones*
-************************************************
-*/
+
 
 using namespace std; 
 
@@ -293,7 +290,7 @@ void realizadTransferencia(const int& idOrigen, const int& idDestino, const doub
 // El segundo const id es de la cuenta
 // se recibe el monto para abonar
 // Recibe la base de datos donde existe la cuenta y el préstamo.
-void realizarAbono(const int& idPrestamo, const double& tipoCambio, const int& idCuenta, sqlite3* db) {
+void realizarAbono(const int& idPrestamo, const double& TipoCambio, const int& idCuenta, sqlite3* db) {
     // Determinar el tipo de cuenta según el prefijo del ID
     string idCuentaStr = to_string(idCuenta);
     string cuentaPrefix = idCuentaStr.substr(0, 3);
@@ -374,7 +371,7 @@ void realizarAbono(const int& idPrestamo, const double& tipoCambio, const int& i
         }
     } else if (cuentaEsDolares && montoRestante > 0) {
         // Conversión de dólares a colones
-        double montoConvertido = montoAbono * (tipoCambio);
+        double montoConvertido = montoAbono * (TipoCambio);
         if (saldoCuenta - montoConvertido < 1) {
             cerr << "No se puede realizar el abono. La cuenta no puede quedar con saldo menor que 1 después de la conversión." << endl;
             return;
@@ -382,7 +379,7 @@ void realizarAbono(const int& idPrestamo, const double& tipoCambio, const int& i
         montoAbono = montoConvertido;
     } else if (cuentaEsColones && montoRestante > 0) {
         // Conversión de colones a dólares
-        double montoConvertido = montoAbono / (tipoCambio);
+        double montoConvertido = montoAbono / (TipoCambio);
         if (saldoCuenta - montoConvertido < 1) {
             cerr << "No se puede realizar el abono. La cuenta no puede quedar con saldo menor que 1 después de la conversión." << endl;
             return;
@@ -434,10 +431,135 @@ void realizarAbono(const int& idPrestamo, const double& tipoCambio, const int& i
 // El primer const id es del préstamo
 // El segundo const id es de la cuenta
 // Recibe la base de datos donde existe la cuenta y el préstamo.
-void pagarCuota(const int& idPrestamo, const int& idCuenta, sqlite3* db){
-    cout << "Todavía falta de implementar" << endl;
-    // de momento esta funion queda asi porque no se ha implementado la parte de prestamos 
+void pagarCuota(const int& idPrestamo, const int& idCuenta, const double& TipoCambio, sqlite3* db) {
+    // Determinar el tipo de cuenta según el prefijo del ID
+    string idCuentaStr = to_string(idCuenta);
+    string cuentaPrefix = idCuentaStr.substr(0, 3);
+
+    int cuentaEsColones = (cuentaPrefix == "100");
+    int cuentaEsDolares = (cuentaPrefix == "200");
+
+    // Consultar los datos del préstamo
+    string queryPrestamo;
+    if (cuentaEsColones) {
+        queryPrestamo = "SELECT monto_por_cuota, intereses, cuotas_pagadas, cuotas_pendientes FROM Prestamos_Colones WHERE id_prestamo = ?";
+    } else if (cuentaEsDolares) {
+        queryPrestamo = "SELECT monto_por_cuota, intereses, cuotas_pagadas, cuotas_pendientes FROM Prestamos_Dolares WHERE id_prestamo = ?";
+    } else {
+        cerr << "El ID de la cuenta no corresponde a un tipo válido." << endl;
+        return;
+    }
+
+    double montoPorCuota;
+    double intereses;
+    int cuotasPagadas;
+    int cuotasPendientes;
+
+    sqlite3_stmt* stmtPrestamo;
+    if (sqlite3_prepare_v2(db, queryPrestamo.c_str(), -1, &stmtPrestamo, 0) != SQLITE_OK) {
+        cerr << "Error al preparar la consulta del préstamo: " << sqlite3_errmsg(db) << endl;
+        return;
+    }
+    sqlite3_bind_int(stmtPrestamo, 1, idPrestamo);
+
+    if (sqlite3_step(stmtPrestamo) == SQLITE_ROW) {
+        montoPorCuota = sqlite3_column_double(stmtPrestamo, 0);
+        intereses = sqlite3_column_double(stmtPrestamo, 1);
+        cuotasPagadas = sqlite3_column_int(stmtPrestamo, 2);
+        cuotasPendientes = sqlite3_column_int(stmtPrestamo, 3);
+    } else {
+        cerr << "No se encontró el préstamo con ID " << idPrestamo << endl;
+        sqlite3_finalize(stmtPrestamo);
+        return;
+    }
+    sqlite3_finalize(stmtPrestamo);
+
+    // El monto total de la cuota es el monto base + los intereses generados
+    double montoTotalCuota = montoPorCuota + intereses;
+
+    // Consultar el saldo de la cuenta
+    string querySaldoCuenta = cuentaEsColones
+        ? "SELECT cantidad_dinero FROM Cuenta_Colones WHERE id = ?"
+        : "SELECT cantidad_dinero FROM Cuenta_Dolares WHERE id = ?";
+    double saldoCuenta;
+
+    sqlite3_stmt* stmtCuenta;
+    if (sqlite3_prepare_v2(db, querySaldoCuenta.c_str(), -1, &stmtCuenta, 0) != SQLITE_OK) {
+        cerr << "Error al preparar la consulta de saldo de cuenta: " << sqlite3_errmsg(db) << endl;
+        return;
+    }
+    sqlite3_bind_int(stmtCuenta, 1, idCuenta);
+
+    if (sqlite3_step(stmtCuenta) == SQLITE_ROW) {
+        saldoCuenta = sqlite3_column_double(stmtCuenta, 0);
+    } else {
+        cerr << "No se encontró la cuenta con ID " << idCuenta << endl;
+        sqlite3_finalize(stmtCuenta);
+        return;
+    }
+    sqlite3_finalize(stmtCuenta);
+
+    // Realizar validaciones según los tipos de cuenta y préstamo
+    if (cuentaEsColones && saldoCuenta < montoTotalCuota) {
+        cerr << "Saldo insuficiente para pagar la cuota. Se requieren " << montoTotalCuota << " colones." << endl;
+        return;
+    } else if (cuentaEsDolares && saldoCuenta < montoTotalCuota) {
+        cerr << "Saldo insuficiente para pagar la cuota. Se requieren " << montoTotalCuota << " dólares." << endl;
+        return;
+    } else if (cuentaEsColones && montoTotalCuota / TipoCambio > saldoCuenta) {
+        cerr << "Saldo insuficiente para pagar la cuota convertida en dólares." << endl;
+        return;
+    } else if (cuentaEsDolares && montoTotalCuota * TipoCambio > saldoCuenta) {
+        cerr << "Saldo insuficiente para pagar la cuota convertida en colones." << endl;
+        return;
+    }
+
+    // Actualizar el saldo de la cuenta
+    double montoADebitar = (cuentaEsColones) ? montoTotalCuota : montoTotalCuota;
+    string queryUpdateCuenta = cuentaEsColones
+        ? "UPDATE Cuenta_Colones SET cantidad_dinero = cantidad_dinero - ? WHERE id = ?"
+        : "UPDATE Cuenta_Dolares SET cantidad_dinero = cantidad_dinero - ? WHERE id = ?";
+    sqlite3_stmt* stmtUpdateCuenta;
+    if (sqlite3_prepare_v2(db, queryUpdateCuenta.c_str(), -1, &stmtUpdateCuenta, 0) != SQLITE_OK) {
+        cerr << "Error al preparar la consulta de actualización de cuenta: " << sqlite3_errmsg(db) << endl;
+        return;
+    }
+    sqlite3_bind_double(stmtUpdateCuenta, 1, montoADebitar);
+    sqlite3_bind_int(stmtUpdateCuenta, 2, idCuenta);
+
+    if (sqlite3_step(stmtUpdateCuenta) != SQLITE_DONE) {
+        cerr << "Error al ejecutar la actualización de la cuenta: " << sqlite3_errmsg(db) << endl;
+        sqlite3_finalize(stmtUpdateCuenta);
+        return;
+    }
+    sqlite3_finalize(stmtUpdateCuenta);
+
+    // Actualizar el número de cuotas pagadas y cuotas pendientes
+    if (cuotasPendientes > 0) {
+        string queryUpdatePrestamo = cuentaEsColones
+            ? "UPDATE Prestamos_Colones SET cuotas_pagadas = cuotas_pagadas + 1, cuotas_pendientes = cuotas_pendientes - 1 WHERE id_prestamo = ?"
+            : "UPDATE Prestamos_Dolares SET cuotas_pagadas = cuotas_pagadas + 1, cuotas_pendientes = cuotas_pendientes - 1 WHERE id_prestamo = ?";
+        
+        sqlite3_stmt* stmtUpdatePrestamo;
+        if (sqlite3_prepare_v2(db, queryUpdatePrestamo.c_str(), -1, &stmtUpdatePrestamo, 0) != SQLITE_OK) {
+            cerr << "Error al preparar la consulta de actualización del préstamo: " << sqlite3_errmsg(db) << endl;
+            return;
+        }
+        sqlite3_bind_int(stmtUpdatePrestamo, 1, idPrestamo);
+
+        if (sqlite3_step(stmtUpdatePrestamo) != SQLITE_DONE) {
+            cerr << "Error al ejecutar la actualización del préstamo: " << sqlite3_errmsg(db) << endl;
+            sqlite3_finalize(stmtUpdatePrestamo);
+            return;
+        }
+        sqlite3_finalize(stmtUpdatePrestamo);
+
+        cout << "Pago de cuota realizado con éxito. Se descontaron " << montoTotalCuota << " de la cuenta y se actualizó el préstamo." << endl;
+    } else {
+        cerr << "No hay cuotas pendientes para el préstamo." << endl;
+    }
 }
+
 
 // Recibe el id de la cuenta la cual se quiere registrar una salida del pais 
 // Recibe la base de datos donde existe la cuenta
@@ -570,8 +692,108 @@ void consultarCVV(const int& idCuenta, sqlite3* db) {
 
 // Recibe el id de la cuenta que se quiere realizar la impresión del estado de cuenta
 // Recibe una base de datos 
-void imprimirEstadoCuenta(const int& idCuenta, sqlite3* db){
-    cout << "Todavía falta de implementar" << endl;
+void imprimirEstadoCuenta(const int& idCuenta, sqlite3* db) {
+    // Convertir el id de cuenta a string para identificar si es de colones o dólares
+    string idCuentaStr = to_string(idCuenta);
+    string cuentaPrefix = idCuentaStr.substr(0, 3);
+
+    // Determinar la tabla correspondiente
+    string query;
+    if (cuentaPrefix == "100") {
+        query = "SELECT detalle, fecha FROM Movimientos_Colones WHERE id_cuenta = ?;";
+    } else if (cuentaPrefix == "200") {
+        query = "SELECT detalle, fecha FROM Movimientos_dolares WHERE id_cuenta = ?;";
+    } else {
+        cout << "Cuenta no válida." << endl;
+        return;
+    }
+
+    // Preparar la consulta SQL
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, 0) != SQLITE_OK) {
+        cerr << "Error al preparar la consulta: " << sqlite3_errmsg(db) << endl;
+        return;
+    }
+
+    // Vincular el id de la cuenta al primer parámetro de la consulta
+    sqlite3_bind_int(stmt, 1, idCuenta);
+
+    // Comenzamos a imprimir la cabecera
+    cout << "**********************************" << endl;
+    cout << "*     Estado de Cuenta          *" << endl;
+    cout << "**********************************" << endl;
+    cout << "* ID Cuenta: " << idCuenta << "                      *" << endl;
+    cout << "**********************************" << endl;
+    cout << setw(30) << left << "Detalle" << setw(20) << "Fecha" << endl;
+    cout << "----------------------------------" << endl;
+
+    // Recorrer los resultados de la consulta
+    bool hayMovimientos = false;
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        hayMovimientos = true;
+
+        // Obtener los valores de cada movimiento
+        const unsigned char* detalle = sqlite3_column_text(stmt, 0);
+        const unsigned char* fecha = sqlite3_column_text(stmt, 1);
+
+        // Imprimir el movimiento de manera estética
+        cout << setw(30) << left << detalle << setw(20) << (char*)fecha << endl;
+    }
+
+    // Si no hay movimientos, informar al usuario
+    if (!hayMovimientos) {
+        cout << "No se encontraron movimientos para esta cuenta." << endl;
+    }
+
+    // Cerrar el statement
+    sqlite3_finalize(stmt);
+    
+    // Imprimir una línea final
+    cout << "**********************************" << endl;
+}
+
+
+//Se busca automatizar lo que es el envio de informacion a las bases de datos de movimientos.
+void AgregarMov(const int* idCuenta, const string* Detalle, sqlite3* db) {
+    // Convertir el id de cuenta a string para poder analizar el prefijo
+    string idCuentaStr = to_string(*idCuenta);
+    string cuentaPrefix = idCuentaStr.substr(0, 3);
+
+    // Determinar si es cuenta en colones o en dólares
+    bool cuentaEsColones = (cuentaPrefix == "100");
+    bool cuentaEsDolares = (cuentaPrefix == "200");
+
+    // Crear la consulta SQL para insertar el movimiento en la tabla correspondiente
+    string query;
+    if (cuentaEsColones) {
+        query = "INSERT INTO Movimientos_Colones (id_cuenta, detalle) VALUES (?, ?);";
+    } else if (cuentaEsDolares) {
+        query = "INSERT INTO Movimientos_dolares (id_cuenta, detalle) VALUES (?, ?);";
+    } else {
+        cerr << "El ID de cuenta no corresponde a un tipo válido." << endl;
+        return;
+    }
+
+    // Preparar el statement SQL para la inserción
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, 0) != SQLITE_OK) {
+        cerr << "Error al preparar la consulta: " << sqlite3_errmsg(db) << endl;
+        return;
+    }
+
+    // Vincular los parámetros de la consulta
+    sqlite3_bind_int(stmt, 1, *idCuenta);              // Vincular el ID de la cuenta
+    sqlite3_bind_text(stmt, 2, Detalle->c_str(), -1, SQLITE_STATIC); // Vincular el detalle del movimiento
+
+    // Ejecutar la consulta
+    if (sqlite3_step(stmt) != SQLITE_DONE) {
+        cerr << "Error al ejecutar la consulta: " << sqlite3_errmsg(db) << endl;
+    } else {
+        cout << "Movimiento registrado correctamente." << endl;
+    }
+
+    // Limpiar el statement
+    sqlite3_finalize(stmt);
 }
 
 // Funcion para desplegar el menu de opciones de atencion al cliente
@@ -605,7 +827,7 @@ string showMenuAC(const int& idCuenta, const double& TipoCambio, sqlite3* db) {
             case 5:
                 cout << "Ingrese el número de depósito" << endl;
                 cin >> idPrestamo;
-                pagarCuota(idPrestamo, idCuenta, db);
+                pagarCuota(idPrestamo, idCuenta, TipoCambio, db);
                 break;
             case 6:
                 registrarSalidaPais(idCuenta, db);
