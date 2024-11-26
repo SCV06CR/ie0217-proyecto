@@ -11,6 +11,7 @@
 #include "Verificacion.hpp" 
 #include "ConsultaDB.hpp"
 #include "AtencionCliente.hpp"
+#include "baseDatos.hpp"
 #include "InformacionPrestamos.hpp"
 
 using namespace std;
