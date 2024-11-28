@@ -23,7 +23,7 @@ void showMenuSP(const int& idCuenta, sqlite3* db);
 void gestionarPrestamo(sqlite3* db, const int& idCuenta);
 
 // Funcion que almacena los datos de un prestamo en las tablas correspondientes
-void solicitarPrestamo(sqlite3* db, const string& tabla,const int& idCuenta, int& interes, int& monto, int& plazoPrestamo, const string& tipoPrestamo);
+void solicitarPrestamo(sqlite3* db, const string& tabla,const int& idCuenta, double& interes, double& monto, int& plazoPrestamo, const string& tipoPrestamo);
 
 // Funcion para imprimir los datos de un prestamo dado su ID
 void consultaPrestamo(sqlite3* db, int &idPrestamo, const string& tabla);

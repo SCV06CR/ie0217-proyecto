@@ -42,8 +42,8 @@ void showMenuSP(const int& idCuenta, sqlite3* db) {
 // Sub menu de solicitud de prestamos
 void gestionarPrestamo(sqlite3* db, const int& idCuenta) {
     int opcionPrestamo;
-    int montoColones;
-    int montoDolares;
+    double montoColones;
+    double montoDolares;
 
     // si los primeros numeros son 100 es cuenta en colones 
     // Si los primeros numeros son 200 es cuenta en dolares
@@ -77,7 +77,7 @@ void gestionarPrestamo(sqlite3* db, const int& idCuenta) {
             cin >> montoDolares;
         }
 
-        int interes;
+        double interes;
         int plazoPrestamo;
 
         // Tipos de prestamos disponibles
@@ -225,4 +225,61 @@ void gestionarPrestamo(sqlite3* db, const int& idCuenta) {
                 return;
         }
 
+}
+
+// Inserta en la tabla los datos para el nuevo prestamo
+// Recibe el ID de la cuenta y la base de datos
+// Recibe los datos seleccionados por el usuario para insertar
+void solicitarPrestamo(sqlite3* db, const string& tabla,const int& idCuenta, double& interes, double& monto, int& plazoPrestamo, const string& tipoPrestamo) {
+    // si los primeros numeros son 100 es cuenta en colones 
+    // Si los primeros numeros son 200 es cuenta en dolares
+    // para separar los primeros tres dijitos del id 
+    int colones = 100; 
+    int dolares = 200; 
+
+    std::string idStr = std::to_string(idCuenta); //convertir a string
+    std::string digits = idStr.substr(0, 3); // extraer los primeros 3 caracteres
+    int idPrestamo;
+    string query;
+
+    // Se determina la moneda para el prestamo
+    if (stoi(digits) == colones){
+        idPrestamo = generarPrestamoID(410);
+        // Se mueve el monto en colones a la cuenta correspondiente
+        query = "UPDATE Cuenta_Colones SET cantidad_dinero = cantidad_dinero + " + to_string(monto) + " WHERE id = " + to_string(idCuenta) + ";";
+    } else if (stoi(digits) == dolares){
+        idPrestamo = generarPrestamoID(420);
+        // Se mueve el monto  en dolares a la cuenta correspondiente
+        query = "UPDATE Cuenta_Dolares SET cantidad_dinero = cantidad_dinero + " + to_string(monto) + " WHERE id = " + to_string(idCuenta) + ";";
+    }
+
+    // Se calcula la cuota mensual
+    // Cuota Mensual = (Capital * Taza Interes Mensual) / (1 - (1 + Taza Interes Mensual)^(-Plazo en Meses));
+    double cuotaMensual = (monto * interes) / (1 - pow(1 + interes, -plazoPrestamo));
+
+    // Se insertan los datos en la tabla correspondiente
+    string sql = "INSERT INTO " + tabla + " (id_prestamo, id_cuenta, intereses, meses, monto, intereses_abonados, saldo_restante, tipo_prestamo, monto_por_cuota, cuotas_pagadas) VALUES (" + to_string(idPrestamo) + ", " + to_string(idCuenta) + ", " + to_string(interes) + ", " + to_string(plazoPrestamo) + ", " + to_string(monto) + ", 0, " + to_string(monto) + ",'" + tipoPrestamo + "', " + to_string(cuotaMensual) + ", 0);";
+
+    ejecutarSQL(db, sql.c_str());
+
+
+    // Preparar consulta de sql 
+    sqlite3_stmt* stmt; 
+    if (sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, 0) != SQLITE_OK) {
+        cerr << "Error al preparar la consulta: " << sqlite3_errmsg(db) << endl; 
+        return;
+    }
+
+    // Ejecutar la consulta
+    if(sqlite3_step(stmt) != SQLITE_DONE){
+        cerr << "Error al ejecutar la consulta: " << sqlite3_errmsg(db) << endl; 
+    } else {
+        cout << "Deposito de " << monto << " a la cuenta: " << idCuenta << ", realizado con éxito. \n"; 
+    }
+
+    // Limpiar el statement
+    sqlite3_finalize(stmt); 
+
+    // Se llama a la funcion para imprimir los datos del prestamo
+    consultaPrestamo(db, idPrestamo, tabla);
 }
