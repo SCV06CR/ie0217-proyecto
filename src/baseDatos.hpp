@@ -1,10 +1,10 @@
 #ifndef BASE_DATOS_HPP
 #define BASE_DATOS_HPP
-
 #include <sqlite3.h>
 #include <iostream>
 
 using namespace std;
+
 
 // Funcion que ejecuta consultas sin retorno
 void ejecutarSQL(sqlite3* db, const char* sql);
@@ -13,7 +13,7 @@ void ejecutarSQL(sqlite3* db, const char* sql);
 void consultarTabla(sqlite3* db, const char* tabla);
 
 // Crear las tablas si no existen
-void crearTablas();
+void crearTablas(sqlite3* db);
 
 
 #endif // BASE_DATOS_HPP

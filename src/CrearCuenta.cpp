@@ -5,20 +5,9 @@
 #include <sstream>
 #include <iomanip>
 #include "Hash.hpp"
+#include "baseDatos.hpp"
 
 using namespace std;
-
-// Función para ejecutar comandos SQL sin retorno
-
-void ejecutarSQL(sqlite3* db, const char* sql) {
-    char* mensajeError;
-    if (sqlite3_exec(db, sql, 0, 0, &mensajeError) != SQLITE_OK) {
-        cerr << "Error al ejecutar SQL: " << mensajeError << endl;
-        sqlite3_free(mensajeError);
-    } else {
-        cout << "Operacion realizada correctamente." << endl;
-    }
-}
 
 // Esta funcion lee la contrasena que este ingresando y la oculta (Unix y Windows trabajan con bibliotecas distintas)
 

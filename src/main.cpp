@@ -24,8 +24,6 @@ int main() {
 
     // Abrir la base de datos
     sqlite3* db = abrirBaseDatos("SistemaBancario.db");
-
-    // Crear las tablas
     crearTablas(db);
 
     do {
@@ -50,7 +48,7 @@ int main() {
         switch (option) {
             case 1: {
                 int id;
-                std::string password;
+                string password;
 
                 cout << "Ingrese el ID de la cuenta: ";
                 cin >> id;

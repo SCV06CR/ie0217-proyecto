@@ -1,5 +1,6 @@
 #include <regex>
 #include "InformacionPrestamos.hpp"
+#include "baseDatos.hpp"
 
 using namespace std;
 

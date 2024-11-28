@@ -19,8 +19,6 @@
 
 using namespace std;
 
-// Función para ejecutar comandos SQL sin retorno
-void ejecutarSQL(sqlite3* db, const char* sql);
 
 // Función para ocultar la entrada de la contraseña en la terminal
 string leerPassword();
