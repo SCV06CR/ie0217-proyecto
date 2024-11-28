@@ -406,3 +406,44 @@ void reportePrestamos(sqlite3* db) {
          << "\n\n";
 }
 
+// Funcion para extraer un dato entero de la tabla segun el id del prestamo
+int extraerDatoEntero(sqlite3* db,string &strIDPrestamo, string tabla, string columna) {
+
+    int dato;
+
+    // Se selecciona el dato correspondiente de la columna
+    string sql = "SELECT " + columna + " FROM " + tabla +" WHERE id_prestamo = " + strIDPrestamo + ";";
+    
+    sqlite3_stmt* checkStmt;
+    sqlite3_prepare_v2(db, sql.c_str(), -1, &checkStmt, 0);
+    if (sqlite3_step(checkStmt) == SQLITE_ROW) {
+        // Se almacena el dato
+        dato = sqlite3_column_int(checkStmt, 0); 
+    } else {
+        return 1;
+    }
+    sqlite3_finalize(checkStmt);
+
+    return dato;
+}
+
+// Funcion para extraer un dato double de la tabla segun el id del prestamo
+double extraerDatoDouble(sqlite3* db,string &strIDPrestamo, string tabla, string columna) {
+
+    double dato;
+
+    // Se selecciona el dato correspondiente de la columna
+    string sql = "SELECT " + columna + " FROM " + tabla +" WHERE id_prestamo = " + strIDPrestamo + ";";
+    
+    sqlite3_stmt* checkStmt;
+    sqlite3_prepare_v2(db, sql.c_str(), -1, &checkStmt, 0);
+    if (sqlite3_step(checkStmt) == SQLITE_ROW) {
+        // Se almacena el dato
+        dato = sqlite3_column_double(checkStmt, 0);
+    } else {
+        return 1;
+    }
+    sqlite3_finalize(checkStmt);
+
+    return dato;
+}
