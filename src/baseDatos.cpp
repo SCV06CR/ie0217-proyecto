@@ -70,9 +70,11 @@ void crearTablas(sqlite3* db) {
         CREATE TABLE IF NOT EXISTS Prestamos_Colones (
             id_prestamo INTEGER PRIMARY KEY CHECK(id_prestamo BETWEEN 0 AND 999999) NOT NULL,
             id_cuenta INTEGER NOT NULL,
-            intereses FLOAT NOT NULL,
+            intereses REAL NOT NULL,
             meses INTEGER NOT NULL,
-            monto FLOAT NOT NULL,
+            monto REAL NOT NULL,
+            intereses_abonados REAL NOT NULL,
+            saldo_restante REAL NOT NULL,
             tipo_prestamo TEXT NOT NULL,
             monto_por_cuota FLOAT NOT NULL,
             cuotas_pagadas INTEGER NOT NULL CHECK(cuotas_pagadas >= 0),
@@ -84,13 +86,14 @@ void crearTablas(sqlite3* db) {
         CREATE TABLE IF NOT EXISTS Prestamos_Dolares (
             id_prestamo INTEGER PRIMARY KEY CHECK(id_prestamo BETWEEN 0 AND 999999) NOT NULL,
             id_cuenta INTEGER NOT NULL,
-            intereses INTEGER NOT NULL,
+            intereses REAL NOT NULL,
             meses INTEGER NOT NULL,
-            monto INTEGER NOT NULL,
+            monto REAL NOT NULL,
+            intereses_abonados REAL NOT NULL,
+            saldo_restante REAL NOT NULL,
             tipo_prestamo TEXT NOT NULL,
-            monto_por_cuota FLOAT NOT NULL,
+            monto_por_cuota REAL NOT NULL,
             cuotas_pagadas INTEGER NOT NULL CHECK(cuotas_pagadas >= 0),
-            cuotas_pendientes INTEGER NOT NULL CHECK(cuotas_pagadas >= 0),
             FOREIGN KEY (id_cuenta) REFERENCES Cuenta_Dolares(id) ON DELETE CASCADE
         );
     )";

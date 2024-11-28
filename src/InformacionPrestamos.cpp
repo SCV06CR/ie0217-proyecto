@@ -281,5 +281,62 @@ void solicitarPrestamo(sqlite3* db, const string& tabla,const int& idCuenta, dou
     sqlite3_finalize(stmt); 
 
     // Se llama a la funcion para imprimir los datos del prestamo
+    cout << "\n";
     consultaPrestamo(db, idPrestamo, tabla);
+    cout << "\n";
+}
+
+// Se imprime al usuario los datos del prestamo que solicito
+// Recibe la base de datos, el id del prestamo y la tabla a la cual pertenece
+void consultaPrestamo(sqlite3* db, int &idPrestamo, const string& tabla) {
+    string idStrPrestamo = std::to_string(idPrestamo);
+    string sql;
+
+    // Se determina de que tabla se va a leer la informacion
+    if (tabla == "Prestamos_Colones") {
+        sql = "SELECT * FROM Prestamos_Colones WHERE id_prestamo = ?";
+    } else if(tabla == "Prestamos_Dolares") {
+        sql = "SELECT * FROM Prestamos_Dolares WHERE id_prestamo = ?";
+    }
+
+    // Preparar consulta de sql
+    sqlite3_stmt* stmt; 
+    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, 0) == SQLITE_OK) {
+        
+        cout << "Prestamo tramitado exitosamente\n";
+
+        sqlite3_bind_text(stmt, 1, idStrPrestamo.c_str(), -1, SQLITE_STATIC); // Vincular el id a ? en la consulta
+
+        int colCount = sqlite3_column_count(stmt);
+
+        // Obtener los nombres de las columnas y calcular los anchos para alineación
+        vector<int> colWidths(colCount, 12); // Ajusta el ancho de cada columna si es necesario
+        for (int i = 0; i < colCount; i++) {
+            string colName = reinterpret_cast<const char*>(sqlite3_column_name(stmt, i));
+            colWidths[i] = max(colWidths[i], static_cast<int>(colName.length()));
+            cout << left << setw(colWidths[i]) << colName << " | ";
+        }
+        cout << endl;
+
+        // Línea divisoria
+        for (int i = 0; i < colCount; i++) {
+            cout << string(colWidths[i], '-') << "-+-";
+        }
+        cout << endl;
+
+        // Ejecutar y mostrar cada fila con el mismo ancho de columna
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            for (int i = 0; i < colCount; i++) {
+                const unsigned char* val = sqlite3_column_text(stmt, i);
+                cout << left << setw(colWidths[i]) << (val ? reinterpret_cast<const char*>(val) : "(NULL)") << " | ";
+            }
+            cout << endl;
+        }
+    } else {
+        cerr << "Error al preparar la consulta: " << sqlite3_errmsg(db) << endl; 
+        return;
+    }
+
+    // Limpiar el statement
+    sqlite3_finalize(stmt); 
 }
