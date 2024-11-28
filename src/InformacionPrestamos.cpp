@@ -255,7 +255,8 @@ void solicitarPrestamo(sqlite3* db, const string& tabla,const int& idCuenta, dou
 
     // Se calcula la cuota mensual
     // Cuota Mensual = (Capital * Taza Interes Mensual) / (1 - (1 + Taza Interes Mensual)^(-Plazo en Meses));
-    double cuotaMensual = (monto * interes) / (1 - pow(1 + interes, -plazoPrestamo));
+    double interesMensual = (interesAnual) / 12 / 100;
+    double cuotaMensual = (monto * interesMensual) / (1 - pow(1 + interesMensual, -plazoPrestamo));
 
     // Se insertan los datos en la tabla correspondiente
     string sql = "INSERT INTO " + tabla + " (id_prestamo, id_cuenta, intereses, meses, monto, intereses_abonados, saldo_restante, tipo_prestamo, monto_por_cuota, cuotas_pagadas) VALUES (" + to_string(idPrestamo) + ", " + to_string(idCuenta) + ", " + to_string(interes) + ", " + to_string(plazoPrestamo) + ", " + to_string(monto) + ", 0, " + to_string(monto) + ",'" + tipoPrestamo + "', " + to_string(cuotaMensual) + ", 0);";
@@ -340,3 +341,68 @@ void consultaPrestamo(sqlite3* db, int &idPrestamo, const string& tabla) {
     // Limpiar el statement
     sqlite3_finalize(stmt); 
 }
+
+// Funcion para generar un reporte de un prestamo determinado
+void reportePrestamos(sqlite3* db) {
+
+    // Datos de la tabla de prestamo
+    string strIDPrestamo;
+    double interesAnual;
+    double interesMensual;
+    double capital;
+    int plazoMeses;
+    int cuotasPagadas;
+    double saldoRestante;
+    double interesesAbonados;
+
+    // Se verifica que un ID de prestamo ingresado exista
+    do {
+        cout << "Ingrese el del ID prestamo que desea consultar: \n";
+        cin.ignore();
+        getline(cin, strIDPrestamo);
+    } while (!verificarPrestamo(db, strIDPrestamo));
+
+    // si los primeros numeros son 410 es un prestamo en colones 
+    // Si los primeros numeros son 420 es un prestamo en dolares
+    // para separar los primeros tres dijitos del id 
+    int colones = 410; 
+    int dolares = 420; 
+
+    string digits = strIDPrestamo.substr(0, 3); // extraer los primeros 3 caracteres
+
+    // Se determina la moneda del prestamo
+    string tabla;
+    if (stoi(digits) == colones){
+        tabla = "Prestamos_Colones";
+    } else if (stoi(digits) == dolares){
+        tabla = "Prestamos_Dolares";
+    }
+
+    // Se extraen los datos necesarios de la tabla de prestamos
+    interesAnual = extraerDatoDouble(db, strIDPrestamo, tabla, "intereses");
+    capital = extraerDatoDouble(db, strIDPrestamo, tabla, "monto");
+    plazoMeses = extraerDatoEntero(db, strIDPrestamo, tabla, "meses");
+    cuotasPagadas = extraerDatoEntero(db, strIDPrestamo, tabla, "cuotas_pagadas");
+    saldoRestante = extraerDatoDouble(db, strIDPrestamo, tabla, "saldo_restante");
+    interesesAbonados = extraerDatoDouble(db, strIDPrestamo, tabla, "intereses_abonados");
+    cuotaMensual = extraerDatoDouble(db, strIDPrestamo, tabla, "monto_por_cuota");
+    
+    // Cuota Interes Mensual = (Cuotas Restantes * Interes Mensual) / 12
+    double cuotaInteresMensual = (saldoRestante * (interesAnual / 100)) / 12;
+    
+    // Calculo del aporte al capital
+    double aporteCapital = capital - saldoRestante;
+
+    cout.precision(3);
+    cout << fixed
+         << "\nReporte de prestamos\n"
+         << "ID del prestamo: " << strIDPrestamo << "\n"
+         << "Capital inicial: " << capital << "\n"
+         << "Cuota mensual con interes: " << cuotaMensual << "\n"
+         << "Cuota de interes mensual: " << cuotaInteresMensual << "\n"
+         << "Cuotas Pagas: " << cuotasPagadas << "\n"
+         << "Aporte al capital: " << aporteCapital << "\n"
+         << "Intereses Abonados: " << interesesAbonados << "\n"
+         << "\n\n";
+}
+
