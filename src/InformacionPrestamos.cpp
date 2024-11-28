@@ -255,7 +255,7 @@ void solicitarPrestamo(sqlite3* db, const string& tabla,const int& idCuenta, dou
 
     // Se calcula la cuota mensual
     // Cuota Mensual = (Capital * Taza Interes Mensual) / (1 - (1 + Taza Interes Mensual)^(-Plazo en Meses));
-    double interesMensual = (interesAnual) / 12 / 100;
+    double interesMensual = (interes) / 12 / 100;
     double cuotaMensual = (monto * interesMensual) / (1 - pow(1 + interesMensual, -plazoPrestamo));
 
     // Se insertan los datos en la tabla correspondiente
@@ -275,7 +275,7 @@ void solicitarPrestamo(sqlite3* db, const string& tabla,const int& idCuenta, dou
     if(sqlite3_step(stmt) != SQLITE_DONE){
         cerr << "Error al ejecutar la consulta: " << sqlite3_errmsg(db) << endl; 
     } else {
-        cout << "Deposito de " << monto << " a la cuenta: " << idCuenta << ", realizado con éxito. \n"; 
+        cout << fixed << "Deposito de " << monto << " a la cuenta: " << idCuenta << ", realizado con éxito. \n"; 
     }
 
     // Limpiar el statement
@@ -354,6 +354,7 @@ void reportePrestamos(sqlite3* db) {
     int cuotasPagadas;
     double saldoRestante;
     double interesesAbonados;
+    double cuotaMensual;
 
     // Se verifica que un ID de prestamo ingresado exista
     do {

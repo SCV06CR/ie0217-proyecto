@@ -68,7 +68,7 @@ void crearTablas(sqlite3* db) {
     // Tabla de Préstamos
     const char* sqlPrestamosColones = R"(
         CREATE TABLE IF NOT EXISTS Prestamos_Colones (
-            id_prestamo INTEGER PRIMARY KEY CHECK(id_prestamo BETWEEN 0 AND 999999) NOT NULL,
+            id_prestamo INTEGER PRIMARY KEY CHECK(id_prestamo BETWEEN 0 AND 999999999) NOT NULL,
             id_cuenta INTEGER NOT NULL,
             intereses REAL NOT NULL,
             meses INTEGER NOT NULL,
@@ -84,7 +84,7 @@ void crearTablas(sqlite3* db) {
 
     const char* sqlPrestamosDolares = R"(
         CREATE TABLE IF NOT EXISTS Prestamos_Dolares (
-            id_prestamo INTEGER PRIMARY KEY CHECK(id_prestamo BETWEEN 0 AND 999999) NOT NULL,
+            id_prestamo INTEGER PRIMARY KEY CHECK(id_prestamo BETWEEN 0 AND 999999999) NOT NULL,
             id_cuenta INTEGER NOT NULL,
             intereses REAL NOT NULL,
             meses INTEGER NOT NULL,
