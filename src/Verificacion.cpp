@@ -51,3 +51,43 @@ bool verificarCuenta(sqlite3* db, int id, const string& password) {
     return false;
 }
 
+// Función para verificar si un Prestamo existe en una tabla específica
+bool prestamoValido(sqlite3* db, const string& tabla, string idPrestamo) {
+    string sql = "SELECT COUNT(*) FROM " + tabla + " WHERE id_prestamo = " + idPrestamo + ";";
+    sqlite3_stmt* stmt;
+    bool esValida = false;
+
+    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, 0) == SQLITE_OK) {
+        if (sqlite3_step(stmt) == SQLITE_ROW && sqlite3_column_int(stmt, 0) > 0) {
+            esValida = true;
+        }
+    } else {
+        cerr << "Error al verificar el ID del Prestamo: " << sqlite3_errmsg(db) << endl;
+    }
+    sqlite3_finalize(stmt);
+    return esValida;
+}
+
+// Función para verificar un prestamo en ambas tablas
+bool verificarPrestamo(sqlite3* db, string &idPrestamo) {
+    
+    // Bucle para solicitar el ID hasta que tenga 9 dígitos
+    if (idPrestamo.length() != 8) {
+        cerr << "Error: El ID debe tener exactamente 8 dígitos." << endl;
+        cout << "Por favor, ingrese un ID válido de 8 dígitos\n";
+        return false;
+    }
+
+    // Verificar en la tabla de Cuenta_Colones
+    if (prestamoValido(db, "Prestamos_Colones", idPrestamo)) {
+        return true;
+    }
+    // Verificar en la tabla de Cuenta_Dolares
+    if (prestamoValido(db, "Prestamos_Dolares", idPrestamo)) {
+        return true;
+    }
+
+    cout << "Prestamo no encontrado\n";
+    return false;
+}
+

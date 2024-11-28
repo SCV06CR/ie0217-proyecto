@@ -301,9 +301,9 @@ void realizarAbono(const int& idPrestamo, const double& TipoCambio, const int& i
     // Consultar el tipo de préstamo (colones o dólares)
     string queryPrestamo;
     if (cuentaEsColones) {
-        queryPrestamo = "SELECT monto, cuotas_pagadas FROM Prestamos_Colones WHERE id_prestamo = ?";
+        queryPrestamo = "SELECT saldo_restante, cuotas_pagadas FROM Prestamos_Colones WHERE id_prestamo = ?";
     } else if (cuentaEsDolares) {
-        queryPrestamo = "SELECT monto, cuotas_pagadas FROM Prestamos_Dolares WHERE id_prestamo = ?";
+        queryPrestamo = "SELECT saldo_restante, cuotas_pagadas FROM Prestamos_Dolares WHERE id_prestamo = ?";
     } else {
         cerr << "El ID de la cuenta no corresponde a un tipo válido." << endl;
         return;
@@ -408,8 +408,8 @@ void realizarAbono(const int& idPrestamo, const double& TipoCambio, const int& i
 
     // Actualizar monto restante del préstamo
     string queryUpdatePrestamo = cuentaEsColones
-        ? "UPDATE Prestamos_Colones SET monto = monto - ? WHERE id_prestamo = ?"
-        : "UPDATE Prestamos_Dolares SET monto = monto - ? WHERE id_prestamo = ?";
+        ? "UPDATE Prestamos_Colones SET saldo_restante = saldo_restante - ? WHERE id_prestamo = ?"
+        : "UPDATE Prestamos_Dolares SET saldo_restante = saldo_restante - ? WHERE id_prestamo = ?";
     sqlite3_stmt* stmtUpdatePrestamo;
     if (sqlite3_prepare_v2(db, queryUpdatePrestamo.c_str(), -1, &stmtUpdatePrestamo, 0) != SQLITE_OK) {
         cerr << "Error al preparar la consulta de actualización del préstamo: " << sqlite3_errmsg(db) << endl;

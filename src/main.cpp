@@ -81,7 +81,7 @@ int main() {
 
                         case 2:
                             cout << "Ingresando al menú de solicitud de prestamo..." << endl;
-                            gestionarPrestamo(db, id);
+                            showMenuSP(id, db);
                             break;
 
                         case 3:
