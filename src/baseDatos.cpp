@@ -1,6 +1,14 @@
 #include "baseDatos.hpp"
 
-// Función para ejecutar comandos SQL sin retorno
+/**
+ * @brief Ejecuta un comando SQL sin retorno.
+ * 
+ * Esta función se utiliza para ejecutar comandos SQL que no requieren un valor de retorno, como la 
+ * creación de tablas o la inserción de datos. En caso de error, muestra el mensaje de error.
+ * 
+ * @param db Puntero a la base de datos SQLite donde se ejecutará el comando.
+ * @param sql Cadena de texto con el comando SQL a ejecutar.
+ */
 void ejecutarSQL(sqlite3* db, const char* sql) {
     char* mensajeError;
     if (sqlite3_exec(db, sql, 0, 0, &mensajeError) != SQLITE_OK) {
@@ -11,7 +19,15 @@ void ejecutarSQL(sqlite3* db, const char* sql) {
     }
 }
 
-// Función para crear las tablas de la base de datos
+/**
+ * @brief Crea las tablas necesarias en la base de datos.
+ * 
+ * Esta función crea las tablas para gestionar cuentas, movimientos y préstamos en la base de datos. 
+ * Se incluyen tablas para cuentas en colones y dólares, movimientos de cuentas, y préstamos, 
+ * tanto en colones como en dólares. Además, habilita las claves foráneas para mantener la integridad referencial.
+ * 
+ * @param db Puntero a la base de datos SQLite donde se crearán las tablas.
+ */
 void crearTablas(sqlite3* db) {
 
     if (db) {
