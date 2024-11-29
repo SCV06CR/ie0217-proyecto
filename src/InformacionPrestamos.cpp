@@ -5,6 +5,15 @@
 using namespace std;
 
 // Genera el id random con un prefijo (410 colones, 420 dolares)
+/**
+ * @brief Genera un ID de préstamo aleatorio con un prefijo específico.
+ * 
+ * Esta función utiliza la semilla aleatoria basada en el tiempo para generar un ID único de préstamo
+ * con un prefijo (410 para colones, 420 para dólares).
+ * 
+ * @param prefijo El prefijo que identifica la moneda del préstamo (410 para colones, 420 para dólares).
+ * @return El ID generado aleatoriamente para el préstamo.
+ */
 int generarPrestamoID(int prefijo) {
     /* Inicializacion de la semilla aleatoria: */
     srand(time(NULL));
@@ -14,6 +23,15 @@ int generarPrestamoID(int prefijo) {
 
 // Sub menu de gestion de prestamos
 // Recibe el id de la cuenta
+/**
+ * @brief Muestra el menú para la gestión de préstamos.
+ * 
+ * Este menú permite al usuario seleccionar opciones para solicitar un préstamo, 
+ * generar un reporte de pagos estimados o regresar al menú anterior.
+ * 
+ * @param idCuenta El ID de la cuenta asociada al usuario.
+ * @param db Puntero a la base de datos SQLite para realizar consultas.
+ */
 void showMenuSP(const int& idCuenta, sqlite3* db) {
     int opcion;
 
@@ -55,7 +73,15 @@ void showMenuSP(const int& idCuenta, sqlite3* db) {
 }
 
 
-// Sub menu de solicitud de prestamos
+/**
+ * @brief Gestiona la solicitud de un préstamo según el tipo de préstamo y moneda.
+ * 
+ * Dependiendo de los primeros tres dígitos del ID de cuenta, el usuario puede solicitar préstamos
+ * en colones o dólares. Se permiten tres tipos de préstamos: personal, prendario e hipotecario.
+ * 
+ * @param db Puntero a la base de datos SQLite para realizar consultas.
+ * @param idCuenta El ID de la cuenta asociada al usuario.
+ */
 void gestionarPrestamo(sqlite3* db, const int& idCuenta) {
     int opcionPrestamo;
     double montoColones;
@@ -243,9 +269,21 @@ void gestionarPrestamo(sqlite3* db, const int& idCuenta) {
 
 }
 
-// Inserta en la tabla los datos para el nuevo prestamo
-// Recibe el ID de la cuenta y la base de datos
-// Recibe los datos seleccionados por el usuario para insertar
+/**
+ * @brief Solicita un préstamo y lo registra en la base de datos.
+ * 
+ * Esta función inserta los detalles del préstamo solicitado por el usuario en la base de datos,
+ * incluyendo la tasa de interés, monto, plazo, y tipo de préstamo. Además, se calcula la cuota mensual
+ * a pagar y se actualiza el saldo de la cuenta.
+ * 
+ * @param db Puntero a la base de datos SQLite.
+ * @param tabla El nombre de la tabla donde se almacenarán los datos del préstamo.
+ * @param idCuenta El ID de la cuenta del usuario.
+ * @param interes La tasa de interés anual aplicada al préstamo.
+ * @param monto El monto del préstamo.
+ * @param plazoPrestamo El plazo del préstamo en meses.
+ * @param tipoPrestamo El tipo de préstamo solicitado (personal, prendario, hipotecario).
+ */
 void solicitarPrestamo(sqlite3* db, const string& tabla,const int& idCuenta, double& interes, double& monto, int& plazoPrestamo, const string& tipoPrestamo) {
     // si los primeros numeros son 100 es cuenta en colones 
     // Si los primeros numeros son 200 es cuenta en dolares
@@ -305,8 +343,16 @@ void solicitarPrestamo(sqlite3* db, const string& tabla,const int& idCuenta, dou
     cout << "\n";
 }
 
-// Se imprime al usuario los datos del prestamo que solicito
-// Recibe la base de datos, el id del prestamo y la tabla a la cual pertenece
+/**
+ * @brief Consulta los detalles de un préstamo en la base de datos.
+ * 
+ * Esta función recupera los detalles del préstamo solicitado, como monto, saldo restante, cuotas pagadas,
+ * y otros detalles relacionados con el préstamo.
+ * 
+ * @param db Puntero a la base de datos SQLite.
+ * @param idPrestamo El ID del préstamo a consultar.
+ * @param tabla El nombre de la tabla donde se encuentra el préstamo.
+ */
 void consultaPrestamo(sqlite3* db, int &idPrestamo, const string& tabla) {
     string idStrPrestamo = std::to_string(idPrestamo);
     string sql;
@@ -360,7 +406,14 @@ void consultaPrestamo(sqlite3* db, int &idPrestamo, const string& tabla) {
     sqlite3_finalize(stmt); 
 }
 
-// Funcion para generar un reporte de un prestamo determinado
+/**
+ * @brief Genera un reporte detallado de un préstamo determinado.
+ * 
+ * Esta función permite consultar el estado de un préstamo a partir de su ID. El reporte incluye 
+ * información como el capital inicial, saldo restante, cuotas pagadas, intereses abonados y más.
+ * 
+ * @param db Puntero a la base de datos SQLite para realizar consultas.
+ */
 void reportePrestamos(sqlite3* db) {
 
     // Datos de la tabla de prestamo
@@ -423,7 +476,18 @@ void reportePrestamos(sqlite3* db) {
          << "\n\n";
 }
 
-// Funcion para extraer un dato entero de la tabla segun el id del prestamo
+/**
+ * @brief Extrae un dato entero de la tabla de préstamos según el ID del préstamo.
+ * 
+ * Esta función realiza una consulta SQL para obtener un valor entero de una columna específica 
+ * de la tabla de préstamos correspondiente, según el ID del préstamo proporcionado.
+ * 
+ * @param db Puntero a la base de datos SQLite.
+ * @param strIDPrestamo El ID del préstamo para el cual se desea extraer el dato.
+ * @param tabla El nombre de la tabla (por ejemplo, "Prestamos_Colones" o "Prestamos_Dolares").
+ * @param columna El nombre de la columna de la cual se extraerá el dato.
+ * @return El valor entero extraído de la base de datos.
+ */
 int extraerDatoEntero(sqlite3* db,string &strIDPrestamo, string tabla, string columna) {
 
     int dato;
@@ -444,7 +508,18 @@ int extraerDatoEntero(sqlite3* db,string &strIDPrestamo, string tabla, string co
     return dato;
 }
 
-// Funcion para extraer un dato double de la tabla segun el id del prestamo
+/**
+ * @brief Extrae un dato de tipo double de la tabla de préstamos según el ID del préstamo.
+ * 
+ * Esta función realiza una consulta SQL para obtener un valor de tipo double de una columna específica 
+ * de la tabla de préstamos correspondiente, según el ID del préstamo proporcionado.
+ * 
+ * @param db Puntero a la base de datos SQLite.
+ * @param strIDPrestamo El ID del préstamo para el cual se desea extraer el dato.
+ * @param tabla El nombre de la tabla (por ejemplo, "Prestamos_Colones" o "Prestamos_Dolares").
+ * @param columna El nombre de la columna de la cual se extraerá el dato.
+ * @return El valor double extraído de la base de datos.
+ */
 double extraerDatoDouble(sqlite3* db,string &strIDPrestamo, string tabla, string columna) {
 
     double dato;
