@@ -1,11 +1,10 @@
 #include "AtencionCliente.hpp"
 #include <regex>
-#include<string>
+#include <string>
+#include <sstream>
 #include <iomanip>
 using namespace std; 
 
-
-using namespace std; 
 
 // Esta funcion recibe como argumentos el id de la cuenta a la que se le quiere hacer un deposito
 // Recibe como argumento el monto a depositar y recibe la base de datos a la cual se le va a ingresar el dinero. 
@@ -47,7 +46,16 @@ void realizadDeposito(const int& id, sqlite3* db){
     if(sqlite3_step(stmt) != SQLITE_DONE){
         cerr << "Error al ejecutar la consulta: " << sqlite3_errmsg(db) << endl; 
     } else {
-        cout << "Deposito de " << monto << "a la cuenta: " << id << ", realizado con éxito." <<endl; 
+
+        ostringstream detalle;
+        detalle << "Depósito de " << monto ;
+        // Convertir a detalle a string
+        const string detalleTexto = detalle.str();
+
+        cout << detalleTexto << "a la cuenta: " << id << ", realizado con éxito." <<endl; 
+        
+        AgregarMov(id, detalleTexto, db); 
+
     }
 
     // Falta agregar el movimiento a la tabla de estados de cuenta.
@@ -64,91 +72,118 @@ void realizadRetiro(const int& id, sqlite3* db){
     int colones = 100; 
     int dolares = 200; 
     double retiro; 
-    string idStr = to_string(id); //convertir a string
-    string digits = idStr.substr(0, 3); // extraer los primeros 3 caracteres
+    string idStr = to_string(id); // Convertir a string
+    string digits = idStr.substr(0, 3); // Extraer los primeros 3 caracteres
     
-    cout << "Ingrese la cantidad de dinero que desea retirar" << endl;
+    cout << "Ingrese la cantidad de dinero que desea retirar: " << endl;
     cin >> retiro; 
-    // Definiendo consulta SQL segun el tipo de cuenta
+
+    // Definiendo consulta SQL según el tipo de cuenta
     string query; 
 
     if (stoi(digits) == colones){
-        cout << "Ingrese la cantidad de dinero que desea retirar" << endl;
-        cin >> retiro; 
+        // Verificar que la cuenta tenga suficiente saldo
+        string checkQuery = "SELECT cantidad_dinero FROM Cuenta_Colones WHERE id = ?";
+        sqlite3_stmt* checkStmt;
+        sqlite3_prepare_v2(db, checkQuery.c_str(), -1, &checkStmt, 0);
+        sqlite3_bind_text(checkStmt, 1, idStr.c_str(), -1, SQLITE_STATIC);
 
-        //Quiero comprobar que la cuenta no quede con dinero negativo
+        if (sqlite3_step(checkStmt) == SQLITE_ROW) {
+            double currentBalance = sqlite3_column_double(checkStmt, 0);
+            if (currentBalance - retiro < 0) {
+                ostringstream detalle;
+                detalle << "Retiro de: " << retiro << " colones, no realizado por fondos insuficientes.";
+                const string detalleTexto = detalle.str();
+                AgregarMov(id, detalleTexto, db);  // Registrar movimiento
+
+                cout << "No se puede retirar esa cantidad de dinero. Fondos insuficientes." << endl;
+                sqlite3_finalize(checkStmt);
+                return;
+            } else {
+                // Actualizar el saldo de la cuenta
+                query = "UPDATE Cuenta_Colones SET cantidad_dinero = cantidad_dinero - ? WHERE id = ?";
+                sqlite3_stmt* stmt;
+                if (sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, 0) != SQLITE_OK) {
+                    cerr << "Error al preparar la consulta: " << sqlite3_errmsg(db) << endl;
+                    sqlite3_finalize(checkStmt);
+                    return;
+                }
+
+                // Asignar valores a los parámetros
+                sqlite3_bind_double(stmt, 1, retiro); // Vincular el retiro
+                sqlite3_bind_text(stmt, 2, idStr.c_str(), -1, SQLITE_STATIC); // Vincular el ID
+
+                if (sqlite3_step(stmt) != SQLITE_DONE) {
+                    cerr << "Error al ejecutar la consulta: " << sqlite3_errmsg(db) << endl;
+                } else {
+                    // Agregar el movimiento a la tabla de movimientos
+                    ostringstream detalle;
+                    detalle << "Retiro de: " << retiro << " colones, realizado con éxito." << endl;
+                    const string detalleTexto = detalle.str();
+                    AgregarMov(id, detalleTexto, db);  // Registrar movimiento
+
+                    cout << "Retiro de " << retiro << " colones de la cuenta: " << id << ", realizado con éxito." << endl;
+                }
+
+                sqlite3_finalize(stmt);
+            }
+        }
+        sqlite3_finalize(checkStmt);
+    }
+
+    else if (stoi(digits) == dolares){
+        // Verificar que la cuenta tenga suficiente saldo
         string checkQuery = "SELECT cantidad_dinero FROM Cuenta_Dolares WHERE id = ?";
         sqlite3_stmt* checkStmt;
         sqlite3_prepare_v2(db, checkQuery.c_str(), -1, &checkStmt, 0);
         sqlite3_bind_text(checkStmt, 1, idStr.c_str(), -1, SQLITE_STATIC);
+
         if (sqlite3_step(checkStmt) == SQLITE_ROW) {
             double currentBalance = sqlite3_column_double(checkStmt, 0);
             if (currentBalance - retiro < 0) {
-                cout << " No se puede retirar esa cantidad de dinero. Fondos insuficientes." << endl;
+                ostringstream detalle;
+                detalle << "Retiro de: " << retiro << " dolares, no realizado por fondos insuficientes.";
+                const string detalleTexto = detalle.str();
+                AgregarMov(id, detalleTexto, db);  // Registrar movimiento
+
+                cout << "No se puede retirar esa cantidad de dinero. Fondos insuficientes." << endl;
                 sqlite3_finalize(checkStmt);
                 return;
-            } //Agregar un else con el agregado la actualizacion de la base de datos
-        }
-        sqlite3_finalize(checkStmt);
-
-
-        query = "UPDATE Cuenta_Clones SET cantidad_dinero = cantidad_dinero - ? WHERE id = ?"; 
-    } if (stoi(digits) == dolares){
-
-        cout << "Ingrese la cantidad de dinero que desea retirar" << endl;
-        cin >> retiro; 
-
-        // Definiendo consulta SQL segun el tipo de cuenta
-        string query; 
-
-        if (stoi(digits) == colones){
-            cout << "Ingrese la cantidad de dinero que desea retirar" << endl;
-            cin >> retiro; 
-
-            //Quiero comprobar que la cuenta no quede con dinero negativo
-            string checkQuery = "SELECT cantidad_dinero FROM Cuenta_Colones WHERE id = ?";
-            sqlite3_stmt* checkStmt;
-            sqlite3_prepare_v2(db, checkQuery.c_str(), -1, &checkStmt, 0);
-            sqlite3_bind_text(checkStmt, 1, idStr.c_str(), -1, SQLITE_STATIC);
-            if (sqlite3_step(checkStmt) == SQLITE_ROW) {
-                double currentBalance = sqlite3_column_double(checkStmt, 0);
-                if (currentBalance - retiro < 0) {
-                    cout << " No se puede retirar esa cantidad de dinero. Fondos insuficientes." << endl;
+            } else {
+                // Actualizar el saldo de la cuenta
+                query = "UPDATE Cuenta_Dolares SET cantidad_dinero = cantidad_dinero - ? WHERE id = ?";
+                sqlite3_stmt* stmt;
+                if (sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, 0) != SQLITE_OK) {
+                    cerr << "Error al preparar la consulta: " << sqlite3_errmsg(db) << endl;
                     sqlite3_finalize(checkStmt);
                     return;
                 }
+
+                // Asignar valores a los parámetros
+                sqlite3_bind_double(stmt, 1, retiro); // Vincular el retiro
+                sqlite3_bind_text(stmt, 2, idStr.c_str(), -1, SQLITE_STATIC); // Vincular el ID
+
+                if (sqlite3_step(stmt) != SQLITE_DONE) {
+                    cerr << "Error al ejecutar la consulta: " << sqlite3_errmsg(db) << endl;
+                } else {
+                    // Agregar el movimiento a la tabla de movimientos
+                    ostringstream detalle;
+                    detalle << "Retiro de: " << retiro << " dolares, realizado con éxito."<< endl;
+                    const string detalleTexto = detalle.str();
+                    AgregarMov(id, detalleTexto, db);  // Registrar movimiento
+
+                    cout << "Retiro de " << retiro << " dolares de la cuenta: " << id << ", realizado con éxito." << endl;
+                }
+
+                sqlite3_finalize(stmt);
             }
-            sqlite3_finalize(checkStmt);
-
-        query = "UPDATE Cuenta_Dolares SET cantidad_dinero = cantidad_dinero + ? WHERE id = ?;";
         }
-
-        // Preparar consulta de sql 
-        sqlite3_stmt* stmt; 
-        if (sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, 0) != SQLITE_OK) {
-            cerr << "Error al preparar la consulta: " << sqlite3_errmsg(db) << endl; 
-            return;
-        }
-
-        // Asignar valores a los parametros
-        sqlite3_bind_double(stmt, 1, retiro); //Vinculat el retiro a ? en la consulta
-        sqlite3_bind_text(stmt, 2, idStr.c_str(), -1, SQLITE_STATIC); // Vincular el id a ? en la consulta
-
-        // Ejecutar la consulta
-        if(sqlite3_step(stmt) != SQLITE_DONE){
-            cerr << "Error al ejecutar la consulta: " << sqlite3_errmsg(db) << endl; 
-        } else {
-            cout << "Retiro de " << retiro << "a la cuenta: " << id << ", realizado con éxito." <<endl; 
-        }
-
-        // Falta agregar el movimiento a la tabla de estados de cuenta.
-
-        // Limpiar el statement
-        sqlite3_finalize(stmt); 
+        sqlite3_finalize(checkStmt);
+    }
+    else {
+        cout << "ID de cuenta no válido." << endl;
     }
 }
-
-
 
 // El primer const id es para la cuenta de origen 
 // El segundo const id es para la cuenta destino 
@@ -163,13 +198,13 @@ void realizadTransferencia(const int& idOrigen, const int& idDestino, const doub
     string digOrig = idOrig.substr(0, 3); // extraer los primeros 3 caracteres
     string digDest = idDest.substr(0, 3); // Extraer los primeros 3 caracteres
 
-    cout << "Ingrese la cantidad de dinero que desea transferir." << std::endl;
+    cout << "Ingrese la cantidad de dinero que desea transferir." << endl;
     cin >> transfer; 
 
     // Definiendo consulta SQL según el tipo de cuenta
     string query;
 
-    if (std::stoi(digOrig) == colones && std::stoi(digDest) == colones) {
+    if (std::stoi(digOrig) == colones && stoi(digDest) == colones) {
         // Comprobar que la cuenta de origen no quede en negativo
         string checkQuery = "SELECT cantidad_dinero FROM Cuenta_Clones WHERE id = ?";
         sqlite3_stmt* checkStmt;
@@ -179,6 +214,12 @@ void realizadTransferencia(const int& idOrigen, const int& idDestino, const doub
             double currentBalance = sqlite3_column_double(checkStmt, 0);
             if (currentBalance - transfer < 0) {
                 cout << "No se puede retirar esa cantidad de dinero. Fondos insuficientes." << endl;
+                ostringstream detalle;
+                detalle << "Transferencia de " << transfer << "colones, no realizada por fondos insuficientes"<< endl ;
+                // Convertir a detalle a string
+                const string detalleTexto = detalle.str();
+
+                AgregarMov(idOrigen, detalleTexto, db); 
                 sqlite3_finalize(checkStmt);
                 return;
             }
@@ -198,7 +239,12 @@ void realizadTransferencia(const int& idOrigen, const int& idDestino, const doub
             double currentBalance = sqlite3_column_double(checkStmt, 0);
             if (currentBalance - transfer < 0) {
                 cout << "No se puede retirar esa cantidad de dinero. Fondos insuficientes." << endl;
+                ostringstream detalle;
+                detalle << "Transferencia de " << transfer << "dolares, no realizada por fondos insuficientes"<< endl ;
+                // Convertir a detalle a string
+                const string detalleTexto = detalle.str();
                 sqlite3_finalize(checkStmt);
+                AgregarMov(idOrigen, detalleTexto, db);
                 return;
             }
         }
@@ -207,16 +253,21 @@ void realizadTransferencia(const int& idOrigen, const int& idDestino, const doub
         query ="UPDATE Cuenta_Dolares SET cantidad_dinero = cantidad_dinero - ? WHERE id = ?; "
                 "UPDATE Cuenta_Dolares SET cantidad_dinero = cantidad_dinero + ? WHERE id = ?; ";
 
-    } else if (std::stoi(digOrig) == colones && std::stoi(digDest) == dolares) {
+    } else if (stoi(digOrig) == colones && stoi(digDest) == dolares) {
         // Comprobar que la cuenta de origen no quede en negativo
-        std::string checkQuery = "SELECT cantidad_dinero FROM Cuenta_Clones WHERE id = ?";
+        string checkQuery = "SELECT cantidad_dinero FROM Cuenta_Clones WHERE id = ?";
         sqlite3_stmt* checkStmt;
         sqlite3_prepare_v2(db, checkQuery.c_str(), -1, &checkStmt, 0);
         sqlite3_bind_text(checkStmt, 1, idOrig.c_str(), -1, SQLITE_STATIC);
         if (sqlite3_step(checkStmt) == SQLITE_ROW) {
             double currentBalance = sqlite3_column_double(checkStmt, 0);
             if (currentBalance - transfer < 0) {
-                std::cout << "No se puede retirar esa cantidad de dinero. Fondos insuficientes." << std::endl;
+                cout << "No se puede retirar esa cantidad de dinero. Fondos insuficientes." << endl;
+                ostringstream detalle;
+                detalle << "Transferencia de " << transfer << "colones, no realizada por fondos insuficientes" << endl;
+                // Convertir a detalle a string
+                const string detalleTexto = detalle.str();
+                AgregarMov(idOrigen, detalleTexto, db);
                 sqlite3_finalize(checkStmt);
                 return;
             }
@@ -254,6 +305,11 @@ void realizadTransferencia(const int& idOrigen, const int& idDestino, const doub
             double currentBalance = sqlite3_column_double(checkStmt, 0);
             if (currentBalance - transfer < 0) {
                 std::cout << "No se puede retirar esa cantidad de dinero. Fondos insuficientes." << std::endl;
+                ostringstream detalle;
+                detalle << "Transferencia de " << transfer << "dolares, no realizada por fondos insuficientes"<< endl ;
+                // Convertir a detalle a string
+                const string detalleTexto = detalle.str();
+                AgregarMov(idOrigen, detalleTexto, db);
                 sqlite3_finalize(checkStmt);
                 return;
             }
@@ -278,7 +334,12 @@ void realizadTransferencia(const int& idOrigen, const int& idDestino, const doub
             std::cerr << "Error al ejecutar la consulta: " << sqlite3_errmsg(db) << std::endl;
         } else {
             std::cout << "Transferencia de " << transfer << " desde la cuenta " << idOrigen << " a la cuenta " << idDestino << " realizada con éxito." << std::endl;
-        }
+            ostringstream detalle;
+                detalle << "Transferencia de " << transfer <<", hacia la cuenta " << idDestino << endl;
+                // Convertir a detalle a string
+                const string detalleTexto = detalle.str();
+                AgregarMov(idOrigen, detalleTexto, db);
+        }   
         sqlite3_finalize(stmt);
 
         return;
@@ -361,12 +422,22 @@ void realizarAbono(const int& idPrestamo, const double& TipoCambio, const int& i
         // La cuenta y el préstamo están en colones
         if (saldoCuenta - montoAbono < 1) {
             cerr << "No se puede realizar el abono. La cuenta no puede quedar con saldo menor que 1." << endl;
+            ostringstream detalle;
+            detalle << "Abono de " << montoAbono << "colones, no realizada por fondos insuficientes" << endl;
+            // Convertir a detalle a string
+            const string detalleTexto = detalle.str();
+            AgregarMov(idCuenta, detalleTexto, db);
             return;
         }
     } else if (cuentaEsDolares && montoRestante > 0) {
         // La cuenta y el préstamo están en dólares
         if (saldoCuenta - montoAbono < 1) {
             cerr << "No se puede realizar el abono. La cuenta no puede quedar con saldo menor que 1." << endl;
+            ostringstream detalle;
+            detalle << "Abono de " << montoAbono << "dolares, no realizada por fondos insuficientes" << endl;
+            // Convertir a detalle a string
+            const string detalleTexto = detalle.str();
+            AgregarMov(idCuenta, detalleTexto, db);
             return;
         }
     } else if (cuentaEsDolares && montoRestante > 0) {
@@ -374,6 +445,11 @@ void realizarAbono(const int& idPrestamo, const double& TipoCambio, const int& i
         double montoConvertido = montoAbono * (TipoCambio);
         if (saldoCuenta - montoConvertido < 1) {
             cerr << "No se puede realizar el abono. La cuenta no puede quedar con saldo menor que 1 después de la conversión." << endl;
+            ostringstream detalle;
+            detalle << "Abono de " << montoAbono << "dolares, no realizada por fondos insuficientes"<< endl ;
+            // Convertir a detalle a string
+            const string detalleTexto = detalle.str();
+            AgregarMov(idCuenta, detalleTexto, db);
             return;
         }
         montoAbono = montoConvertido;
@@ -382,6 +458,11 @@ void realizarAbono(const int& idPrestamo, const double& TipoCambio, const int& i
         double montoConvertido = montoAbono / (TipoCambio);
         if (saldoCuenta - montoConvertido < 1) {
             cerr << "No se puede realizar el abono. La cuenta no puede quedar con saldo menor que 1 después de la conversión." << endl;
+            ostringstream detalle;
+            detalle << "Abono de " << montoAbono << "colones, no realizada por fondos insuficientes"<< endl ;
+            // Convertir a detalle a string
+            const string detalleTexto = detalle.str();
+            AgregarMov(idCuenta, detalleTexto, db);
             return;
         }
         montoAbono = montoConvertido;
@@ -426,6 +507,11 @@ void realizarAbono(const int& idPrestamo, const double& TipoCambio, const int& i
     sqlite3_finalize(stmtUpdatePrestamo);
 
     cout << "Abono realizado con éxito. Monto descontado: " << montoAbono << ". Préstamo actualizado correctamente." << endl;
+    ostringstream detalle;
+    detalle << "Abono de " << montoAbono << ", no realizada por fondos insuficientes"<< endl ;
+    // Convertir a detalle a string
+    const string detalleTexto = detalle.str();
+    AgregarMov(idCuenta, detalleTexto, db);
 }
 
 // El primer const id es del préstamo
@@ -502,15 +588,35 @@ void pagarCuota(const int& idPrestamo, const int& idCuenta, const double& TipoCa
     // Realizar validaciones según los tipos de cuenta y préstamo
     if (cuentaEsColones && saldoCuenta < montoTotalCuota) {
         cerr << "Saldo insuficiente para pagar la cuota. Se requieren " << montoTotalCuota << " colones." << endl;
+        ostringstream detalle;
+        detalle << "Pago de cuota de " << montoTotalCuota << " colones, no realizada por fondos insuficientes" << endl ;
+        // Convertir a detalle a string
+        const string detalleTexto = detalle.str();
+        AgregarMov(idCuenta, detalleTexto, db);
         return;
     } else if (cuentaEsDolares && saldoCuenta < montoTotalCuota) {
         cerr << "Saldo insuficiente para pagar la cuota. Se requieren " << montoTotalCuota << " dólares." << endl;
+        ostringstream detalle;
+        detalle << "Pago de cuota de " << montoTotalCuota << " dolares, no realizada por fondos insuficientes" << endl ;
+        // Convertir a detalle a string
+        const string detalleTexto = detalle.str();
+        AgregarMov(idCuenta, detalleTexto, db);
         return;
     } else if (cuentaEsColones && montoTotalCuota / TipoCambio > saldoCuenta) {
         cerr << "Saldo insuficiente para pagar la cuota convertida en dólares." << endl;
+        ostringstream detalle;
+        detalle << "Pago de cuota de " << montoTotalCuota << " colones, no realizada por fondos insuficientes" << endl;
+        // Convertir a detalle a string
+        const string detalleTexto = detalle.str();
+        AgregarMov(idCuenta, detalleTexto, db);
         return;
     } else if (cuentaEsDolares && montoTotalCuota * TipoCambio > saldoCuenta) {
         cerr << "Saldo insuficiente para pagar la cuota convertida en colones." << endl;
+        ostringstream detalle;
+        detalle << "Pago de cuota de " << montoTotalCuota << " dolares, no realizada por fondos insuficientes" << endl;
+        // Convertir a detalle a string
+        const string detalleTexto = detalle.str();
+        AgregarMov(idCuenta, detalleTexto, db);
         return;
     }
 
@@ -555,6 +661,11 @@ void pagarCuota(const int& idPrestamo, const int& idCuenta, const double& TipoCa
         sqlite3_finalize(stmtUpdatePrestamo);
 
         cout << "Pago de cuota realizado con éxito. Se descontaron " << montoTotalCuota << " de la cuenta y se actualizó el préstamo." << endl;
+        ostringstream detalle;
+        detalle << "Pago de cuota de " << montoTotalCuota << endl;
+        // Convertir a detalle a string
+        const string detalleTexto = detalle.str();
+        AgregarMov(idCuenta, detalleTexto, db);
     } else {
         cerr << "No hay cuotas pendientes para el préstamo." << endl;
     }
@@ -643,8 +754,6 @@ void consultarPin(const int& idCuenta, sqlite3* db) {
     // Limpiar el statement
     sqlite3_finalize(stmt);
 }
-
-
 
 
 // Recibe el id de la cuenta la cual se quiere consultar el CVV
@@ -754,10 +863,10 @@ void imprimirEstadoCuenta(const int& idCuenta, sqlite3* db) {
 
 
 //Se busca automatizar lo que es el envio de informacion a las bases de datos de movimientos.
-void AgregarMov(const int* idCuenta, const string* Detalle, sqlite3* db) {
+void AgregarMov(const int& id, const string& Detalle, sqlite3* db) {
     // Convertir el id de cuenta a string para poder analizar el prefijo
-    string idCuentaStr = to_string(*idCuenta);
-    string cuentaPrefix = idCuentaStr.substr(0, 3);
+    string idStr = to_string(id);
+    string cuentaPrefix = idStr.substr(0, 3);
 
     // Determinar si es cuenta en colones o en dólares
     bool cuentaEsColones = (cuentaPrefix == "100");
@@ -782,8 +891,8 @@ void AgregarMov(const int* idCuenta, const string* Detalle, sqlite3* db) {
     }
 
     // Vincular los parámetros de la consulta
-    sqlite3_bind_int(stmt, 1, *idCuenta);              // Vincular el ID de la cuenta
-    sqlite3_bind_text(stmt, 2, Detalle->c_str(), -1, SQLITE_STATIC); // Vincular el detalle del movimiento
+    sqlite3_bind_int(stmt, 1, id);                        // Vincular el ID de la cuenta
+    sqlite3_bind_text(stmt, 2, Detalle.c_str(), -1, SQLITE_STATIC);  // Vincular el detalle del movimiento
 
     // Ejecutar la consulta
     if (sqlite3_step(stmt) != SQLITE_DONE) {
