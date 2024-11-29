@@ -31,7 +31,11 @@ $(TARGET): $(OBJS)
 
 # Regla para compilar los archivos fuente en la carpeta obj
 obj/%.o: src/%.cpp
-	@mkdir -p obj  # Asegura que la carpeta obj exista
+ifeq ($(OSFLAG), WINDOWS)
+	@if not exist obj mkdir obj
+else
+	@mkdir -p obj
+endif
 	$(CC) $(CFLAGS) -c $< -o $@
 
 run: $(TARGET)
