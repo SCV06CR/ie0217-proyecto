@@ -106,7 +106,7 @@ void gestionarPrestamo(sqlite3* db, const int& idCuenta) {
         cin.ignore(); // Limpiar el buffer de entrada
         cin >> tipoPrestamo;
 
-         if (stoi(digits) == colones) {
+        if (stoi(digits) == colones) {
             cout << "\nIngrese el monto en colones del Prestamo: ";
             cin >> montoColones;
 
@@ -411,7 +411,7 @@ void consultaPrestamo(sqlite3* db, int &idPrestamo, const string& tabla) {
  */
 void reportePrestamos(sqlite3* db) {
 
-    // Datos de la tabla de prestamo
+    // Datos de la tabla de préstamo
     string strIDPrestamo;
     double interesAnual;
     double capital;
@@ -420,54 +420,66 @@ void reportePrestamos(sqlite3* db) {
     double interesesAbonados;
     double cuotaMensual;
 
-    // Se verifica que un ID de prestamo ingresado exista
+    // Se verifica que un ID de préstamo ingresado exista
     do {
-        cout << "Ingrese el del ID prestamo que desea consultar: \n";
-        cin.ignore();
+        cout << "Ingrese el ID del préstamo que desea consultar (8 dígitos): ";
         getline(cin, strIDPrestamo);
-    } while (!verificarPrestamo(db, strIDPrestamo));
 
-    // si los primeros numeros son 410 es un prestamo en colones 
-    // Si los primeros numeros son 420 es un prestamo en dolares
-    // para separar los primeros tres dijitos del id 
-    int colones = 410; 
-    int dolares = 420; 
+        // Limpiar espacios en blanco al inicio y al final
+        strIDPrestamo.erase(0, strIDPrestamo.find_first_not_of(' '));
+        strIDPrestamo.erase(strIDPrestamo.find_last_not_of(' ') + 1);
 
-    string digits = strIDPrestamo.substr(0, 3); // extraer los primeros 3 caracteres
+        // Validar longitud de ID
+        if (strIDPrestamo.length() != 8 || !all_of(strIDPrestamo.begin(), strIDPrestamo.end(), ::isdigit)) {
+            cout << "Error: El ID debe tener exactamente 8 dígitos.\nPor favor, ingrese un ID válido de 8 dígitos.\n";
+            strIDPrestamo.clear();
+        }
+    } while (strIDPrestamo.empty() || !verificarPrestamo(db, strIDPrestamo));  // Verifica si el préstamo existe
 
-    // Se determina la moneda del prestamo
+    // Determinamos si es un préstamo en colones (410) o en dólares (420)
+    const int colones = 410; 
+    const int dolares = 420; 
+
+    // Extrae los primeros tres caracteres y los convierte a entero
+    int codigoMoneda = stoi(strIDPrestamo.substr(0, 3));
+
+    // Determinar la tabla correspondiente según la moneda
     string tabla;
-    if (stoi(digits) == colones){
+    if (codigoMoneda == colones) {
         tabla = "Prestamos_Colones";
-    } else if (stoi(digits) == dolares){
+    } else if (codigoMoneda == dolares) {
         tabla = "Prestamos_Dolares";
+    } else {
+        cout << "El ID del préstamo no corresponde a una tabla válida. Inténtelo de nuevo.\n";
+        return;
     }
 
-    // Se extraen los datos necesarios de la tabla de prestamos
+    // Extraer los datos necesarios de la tabla de préstamos
     interesAnual = extraerDatoDouble(db, strIDPrestamo, tabla, "intereses");
     capital = extraerDatoDouble(db, strIDPrestamo, tabla, "monto");
     cuotasPagadas = extraerDatoEntero(db, strIDPrestamo, tabla, "cuotas_pagadas");
     saldoRestante = extraerDatoDouble(db, strIDPrestamo, tabla, "saldo_restante");
     interesesAbonados = extraerDatoDouble(db, strIDPrestamo, tabla, "intereses_abonados");
     cuotaMensual = extraerDatoDouble(db, strIDPrestamo, tabla, "monto_por_cuota");
-    
-    // Cuota Interes Mensual = (Cuotas Restantes * Interes Mensual) / 12
+
+    // Calculo de la cuota de interés mensual
     double cuotaInteresMensual = (saldoRestante * (interesAnual / 100)) / 12;
     
     // Calculo del aporte al capital
     double aporteCapital = capital - saldoRestante;
 
+    // Mostrar el reporte con formato adecuado
     cout.precision(2);
     cout << fixed
-         << "\nReporte de prestamos\n"
-         << "ID del prestamo: " << strIDPrestamo << "\n"
+         << "\nReporte de préstamo\n"
+         << "ID del préstamo: " << strIDPrestamo << "\n"
          << "Capital inicial: " << capital << "\n"
          << "Saldo restante: " << saldoRestante << "\n"
-         << "Cuota mensual con interes: " << cuotaMensual << "\n"
-         << "Cuota de interes mensual: " << cuotaInteresMensual << "\n"
-         << "Cuotas Pagas: " << cuotasPagadas << "\n"
+         << "Cuota mensual con interés: " << cuotaMensual << "\n"
+         << "Cuota de interés mensual: " << cuotaInteresMensual << "\n"
+         << "Cuotas pagadas: " << cuotasPagadas << "\n"
          << "Aporte al capital: " << aporteCapital << "\n"
-         << "Intereses Abonados: " << interesesAbonados << "\n"
+         << "Intereses abonados: " << interesesAbonados << "\n"
          << "\n\n";
 }
 
