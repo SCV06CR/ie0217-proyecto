@@ -1,10 +1,9 @@
 #include "CrearCuenta.hpp"
-#include "AbrirDB.hpp"
+#include "UU.hpp"
 #include <openssl/evp.h>
 #include <iostream>
 #include <sstream>
 #include <iomanip>
-#include "Hash.hpp"
 #include "baseDatos.hpp"
 
 using namespace std;

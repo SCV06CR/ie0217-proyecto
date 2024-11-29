@@ -5,17 +5,25 @@
 #include <vector>
 #include <string>
 #include <sqlite3.h>
-#include "TipoCambio.hpp"
-#include "AbrirDB.hpp"
 #include "CrearCuenta.hpp"
 #include "Verificacion.hpp" 
-#include "ConsultaDB.hpp"
 #include "AtencionCliente.hpp"
 #include "baseDatos.hpp"
+#include "UU.hpp"
 #include "InformacionPrestamos.hpp"
 
 using namespace std;
 
+/**
+ * @brief Función principal del sistema bancario.
+ * 
+ * Esta función es el punto de entrada del programa, que presenta un menú interactivo en la consola donde el usuario puede 
+ * elegir entre tres opciones: ingresar al sistema, crear una cuenta o salir del programa. La opción seleccionada ejecuta 
+ * una serie de operaciones, como la verificación de una cuenta bancaria o la creación de una cuenta nueva. Además, el 
+ * sistema muestra información sobre el tipo de cambio actual de CRC a USD.
+ * 
+ * @return int Código de salida del programa.
+ */
 int main() {
     int option;
     double TipoCambioMin = 520.0;

@@ -4,9 +4,8 @@
 #include<string> 
 #include <iostream>
 #include <sqlite3.h>
-#include "AbrirDB.hpp"
 #include "CrearCuenta.hpp"
-#include "ConsultaDB.hpp"
+#include "UU.hpp"
 #include "Verificacion.hpp"
 #include <math.h>
 #include <time.h>
