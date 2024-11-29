@@ -362,9 +362,9 @@ void realizarAbono(const int& idPrestamo, const double& TipoCambio, const int& i
     // Consultar el tipo de préstamo (colones o dólares)
     string queryPrestamo;
     if (cuentaEsColones) {
-        queryPrestamo = "SELECT saldo_restante, cuotas_pagadas FROM Prestamos_Colones WHERE id_prestamo = ?";
+        queryPrestamo = "SELECT saldo_restante, cuotas_pagadas, meses, intereses FROM Prestamos_Colones WHERE id_prestamo = ?";
     } else if (cuentaEsDolares) {
-        queryPrestamo = "SELECT saldo_restante, cuotas_pagadas FROM Prestamos_Dolares WHERE id_prestamo = ?";
+        queryPrestamo = "SELECT saldo_restante, cuotas_pagadas, meses, intereses FROM Prestamos_Dolares WHERE id_prestamo = ?";
     } else {
         cerr << "El ID de la cuenta no corresponde a un tipo válido." << endl;
         return;
@@ -372,6 +372,8 @@ void realizarAbono(const int& idPrestamo, const double& TipoCambio, const int& i
 
     double montoRestante;
     int cuotasPagadas;
+    int plazoMeses;
+    double intereses;
 
     sqlite3_stmt* stmtPrestamo;
     if (sqlite3_prepare_v2(db, queryPrestamo.c_str(), -1, &stmtPrestamo, 0) != SQLITE_OK) {
@@ -383,6 +385,8 @@ void realizarAbono(const int& idPrestamo, const double& TipoCambio, const int& i
     if (sqlite3_step(stmtPrestamo) == SQLITE_ROW) {
         montoRestante = sqlite3_column_double(stmtPrestamo, 0);
         cuotasPagadas = sqlite3_column_int(stmtPrestamo, 1);
+        plazoMeses = sqlite3_column_int(stmtPrestamo, 2);
+        intereses = sqlite3_column_int(stmtPrestamo, 3);
     } else {
         cerr << "No se encontró el préstamo con ID " << idPrestamo << endl;
         sqlite3_finalize(stmtPrestamo);
@@ -416,6 +420,9 @@ void realizarAbono(const int& idPrestamo, const double& TipoCambio, const int& i
     double montoAbono;
     cout << "Ingrese el monto que desea abonar: ";
     cin >> montoAbono;
+
+    // Se redondea la cifra ingresada y se limita a dos decimales
+    montoAbono = round(montoAbono * 100) / 100;
 
     // Validar y realizar el abono
     if (cuentaEsColones && montoRestante > 0) {
@@ -487,17 +494,25 @@ void realizarAbono(const int& idPrestamo, const double& TipoCambio, const int& i
     }
     sqlite3_finalize(stmtUpdateCuenta);
 
-    // Actualizar monto restante del préstamo
+    // Se calcula la cuota mensual actualizada con el nuevo capital
+    // Cuota Mensual = (Capital * Taza Interes Mensual) / (1 - (1 + Taza Interes Mensual)^(-Plazo en Meses));
+    double interesMensual = (intereses) / 12 / 100;
+    double cuotaMensual = ((montoRestante - montoAbono) * interesMensual) / (1 - pow(1 + interesMensual, -(plazoMeses - cuotasPagadas)));
+    // Se redondea la cifra y se limita a dos decimales
+    cuotaMensual = round(cuotaMensual * 100) / 100;
+
+    // Actualizar monto restante del préstamo y la nueva cuota mensual
     string queryUpdatePrestamo = cuentaEsColones
-        ? "UPDATE Prestamos_Colones SET saldo_restante = saldo_restante - ? WHERE id_prestamo = ?"
-        : "UPDATE Prestamos_Dolares SET saldo_restante = saldo_restante - ? WHERE id_prestamo = ?";
+        ? "UPDATE Prestamos_Colones SET saldo_restante = saldo_restante - ?, monto_por_cuota = ? WHERE id_prestamo = ?"
+        : "UPDATE Prestamos_Dolares SET saldo_restante = saldo_restante - ?, monto_por_cuota = ? WHERE id_prestamo = ?";
     sqlite3_stmt* stmtUpdatePrestamo;
     if (sqlite3_prepare_v2(db, queryUpdatePrestamo.c_str(), -1, &stmtUpdatePrestamo, 0) != SQLITE_OK) {
         cerr << "Error al preparar la consulta de actualización del préstamo: " << sqlite3_errmsg(db) << endl;
         return;
     }
     sqlite3_bind_double(stmtUpdatePrestamo, 1, montoAbono);
-    sqlite3_bind_int(stmtUpdatePrestamo, 2, idPrestamo);
+    sqlite3_bind_double(stmtUpdatePrestamo, 2, cuotaMensual);
+    sqlite3_bind_int(stmtUpdatePrestamo, 3, idPrestamo);
 
     if (sqlite3_step(stmtUpdatePrestamo) != SQLITE_DONE) {
         cerr << "Error al ejecutar la actualización del préstamo: " << sqlite3_errmsg(db) << endl;
@@ -528,18 +543,19 @@ void pagarCuota(const int& idPrestamo, const int& idCuenta, const double& TipoCa
     // Consultar los datos del préstamo
     string queryPrestamo;
     if (cuentaEsColones) {
-        queryPrestamo = "SELECT monto_por_cuota, intereses, cuotas_pagadas, cuotas_pendientes FROM Prestamos_Colones WHERE id_prestamo = ?";
+        queryPrestamo = "SELECT monto_por_cuota, intereses, cuotas_pagadas, saldo_restante, meses FROM Prestamos_Colones WHERE id_prestamo = ?";
     } else if (cuentaEsDolares) {
-        queryPrestamo = "SELECT monto_por_cuota, intereses, cuotas_pagadas, cuotas_pendientes FROM Prestamos_Dolares WHERE id_prestamo = ?";
+        queryPrestamo = "SELECT monto_por_cuota, intereses, cuotas_pagadas, saldo_restante, meses FROM Prestamos_Dolares WHERE id_prestamo = ?";
     } else {
         cerr << "El ID de la cuenta no corresponde a un tipo válido." << endl;
         return;
     }
 
-    double montoPorCuota;
+    double montoTotalCuota;
     double intereses;
     int cuotasPagadas;
-    int cuotasPendientes;
+    double saldoRestante;
+    int plazoMeses;
 
     sqlite3_stmt* stmtPrestamo;
     if (sqlite3_prepare_v2(db, queryPrestamo.c_str(), -1, &stmtPrestamo, 0) != SQLITE_OK) {
@@ -549,10 +565,11 @@ void pagarCuota(const int& idPrestamo, const int& idCuenta, const double& TipoCa
     sqlite3_bind_int(stmtPrestamo, 1, idPrestamo);
 
     if (sqlite3_step(stmtPrestamo) == SQLITE_ROW) {
-        montoPorCuota = sqlite3_column_double(stmtPrestamo, 0);
+        montoTotalCuota = sqlite3_column_double(stmtPrestamo, 0);
         intereses = sqlite3_column_double(stmtPrestamo, 1);
         cuotasPagadas = sqlite3_column_int(stmtPrestamo, 2);
-        cuotasPendientes = sqlite3_column_int(stmtPrestamo, 3);
+        saldoRestante = sqlite3_column_double(stmtPrestamo, 3);
+        plazoMeses = sqlite3_column_int(stmtPrestamo, 4);
     } else {
         cerr << "No se encontró el préstamo con ID " << idPrestamo << endl;
         sqlite3_finalize(stmtPrestamo);
@@ -560,8 +577,29 @@ void pagarCuota(const int& idPrestamo, const int& idCuenta, const double& TipoCa
     }
     sqlite3_finalize(stmtPrestamo);
 
-    // El monto total de la cuota es el monto base + los intereses generados
-    double montoTotalCuota = montoPorCuota + intereses;
+    // Se redondea el monto por cuota extraido y se limita a dos decimales
+    montoTotalCuota = round(montoTotalCuota * 100) / 100;
+
+    // Si es la ultima cuota del prestamo
+    if ((plazoMeses - cuotasPagadas) == 1 ) {
+        // Se re define la cuota mensual actualizada
+        double interesMensual = (intereses) / 12 / 100;
+        montoTotalCuota = (saldoRestante * interesMensual) / (1 - pow(1 + interesMensual, -1));
+    }
+
+    // Se calcula la Cuota Interes Mensual
+    double cuotaInteresMensual = (saldoRestante * (intereses / 100)) / 12;
+    cuotaInteresMensual = round(cuotaInteresMensual * 100) / 100; 
+
+    // Se calcula el rebajo al prestamo sin la cuota de interes mensual
+    double montoCuotaSinInteres = montoTotalCuota - cuotaInteresMensual;
+    montoCuotaSinInteres = round(montoCuotaSinInteres * 100) / 100;
+
+
+    // Se calcula el saldo restante
+    saldoRestante = saldoRestante - montoCuotaSinInteres;
+    saldoRestante = round(saldoRestante * 100) / 100;
+
 
     // Consultar el saldo de la cuenta
     string querySaldoCuenta = cuentaEsColones
@@ -640,18 +678,20 @@ void pagarCuota(const int& idPrestamo, const int& idCuenta, const double& TipoCa
     }
     sqlite3_finalize(stmtUpdateCuenta);
 
-    // Actualizar el número de cuotas pagadas y cuotas pendientes
-    if (cuotasPendientes > 0) {
+    // Actualizar el número de cuotas pagadas, saldo restante por pagar y los intereses abonados
+    if (cuotasPagadas < plazoMeses) {
         string queryUpdatePrestamo = cuentaEsColones
-            ? "UPDATE Prestamos_Colones SET cuotas_pagadas = cuotas_pagadas + 1, cuotas_pendientes = cuotas_pendientes - 1 WHERE id_prestamo = ?"
-            : "UPDATE Prestamos_Dolares SET cuotas_pagadas = cuotas_pagadas + 1, cuotas_pendientes = cuotas_pendientes - 1 WHERE id_prestamo = ?";
+            ? "UPDATE Prestamos_Colones SET cuotas_pagadas = cuotas_pagadas + 1, saldo_restante = ?, intereses_abonados = intereses_abonados + ? WHERE id_prestamo = ?"
+            : "UPDATE Prestamos_Dolares SET cuotas_pagadas = cuotas_pagadas + 1, saldo_restante = ?, intereses_abonados = intereses_abonados + ? WHERE id_prestamo = ?";
         
         sqlite3_stmt* stmtUpdatePrestamo;
         if (sqlite3_prepare_v2(db, queryUpdatePrestamo.c_str(), -1, &stmtUpdatePrestamo, 0) != SQLITE_OK) {
             cerr << "Error al preparar la consulta de actualización del préstamo: " << sqlite3_errmsg(db) << endl;
             return;
         }
-        sqlite3_bind_int(stmtUpdatePrestamo, 1, idPrestamo);
+        sqlite3_bind_double(stmtUpdatePrestamo, 1, saldoRestante);
+        sqlite3_bind_double(stmtUpdatePrestamo, 2, cuotaInteresMensual);
+        sqlite3_bind_int(stmtUpdatePrestamo, 3, idPrestamo);
 
         if (sqlite3_step(stmtUpdatePrestamo) != SQLITE_DONE) {
             cerr << "Error al ejecutar la actualización del préstamo: " << sqlite3_errmsg(db) << endl;

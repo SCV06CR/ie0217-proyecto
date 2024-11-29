@@ -74,9 +74,9 @@ void crearTablas(sqlite3* db) {
             meses INTEGER NOT NULL,
             monto REAL NOT NULL,
             intereses_abonados REAL NOT NULL,
-            saldo_restante REAL NOT NULL,
+            saldo_restante REAL NOT NULL CHECK(saldo_restante >= 0),
             tipo_prestamo TEXT NOT NULL,
-            monto_por_cuota FLOAT NOT NULL,
+            monto_por_cuota FLOAT NOT NULL CHECK(monto_por_cuota >= 0),
             cuotas_pagadas INTEGER NOT NULL CHECK(cuotas_pagadas >= 0),
             FOREIGN KEY (id_cuenta) REFERENCES Cuenta_Colones(id) ON DELETE CASCADE
         );
@@ -90,9 +90,9 @@ void crearTablas(sqlite3* db) {
             meses INTEGER NOT NULL,
             monto REAL NOT NULL,
             intereses_abonados REAL NOT NULL,
-            saldo_restante REAL NOT NULL,
+            saldo_restante REAL NOT NULL CHECK(monto_por_cuota >= 0),
             tipo_prestamo TEXT NOT NULL,
-            monto_por_cuota REAL NOT NULL,
+            monto_por_cuota REAL NOT NULL CHECK(monto_por_cuota >= 0),
             cuotas_pagadas INTEGER NOT NULL CHECK(cuotas_pagadas >= 0),
             FOREIGN KEY (id_cuenta) REFERENCES Cuenta_Dolares(id) ON DELETE CASCADE
         );

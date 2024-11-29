@@ -258,6 +258,8 @@ void solicitarPrestamo(sqlite3* db, const string& tabla,const int& idCuenta, dou
     // Cuota Mensual = (Capital * Taza Interes Mensual) / (1 - (1 + Taza Interes Mensual)^(-Plazo en Meses));
     double interesMensual = (interes) / 12 / 100;
     double cuotaMensual = (monto * interesMensual) / (1 - pow(1 + interesMensual, -plazoPrestamo));
+    // Se redondea la cifra y se limita a dos decimales
+    cuotaMensual = round(cuotaMensual * 100) / 100; 
 
     // Se insertan los datos en la tabla correspondiente
     string sql = "INSERT INTO " + tabla + " (id_prestamo, id_cuenta, intereses, meses, monto, intereses_abonados, saldo_restante, tipo_prestamo, monto_por_cuota, cuotas_pagadas) VALUES (" + to_string(idPrestamo) + ", " + to_string(idCuenta) + ", " + to_string(interes) + ", " + to_string(plazoPrestamo) + ", " + to_string(monto) + ", 0, " + to_string(monto) + ",'" + tipoPrestamo + "', " + to_string(cuotaMensual) + ", 0);";
@@ -349,9 +351,7 @@ void reportePrestamos(sqlite3* db) {
     // Datos de la tabla de prestamo
     string strIDPrestamo;
     double interesAnual;
-    double interesMensual;
     double capital;
-    int plazoMeses;
     int cuotasPagadas;
     double saldoRestante;
     double interesesAbonados;
@@ -383,7 +383,6 @@ void reportePrestamos(sqlite3* db) {
     // Se extraen los datos necesarios de la tabla de prestamos
     interesAnual = extraerDatoDouble(db, strIDPrestamo, tabla, "intereses");
     capital = extraerDatoDouble(db, strIDPrestamo, tabla, "monto");
-    plazoMeses = extraerDatoEntero(db, strIDPrestamo, tabla, "meses");
     cuotasPagadas = extraerDatoEntero(db, strIDPrestamo, tabla, "cuotas_pagadas");
     saldoRestante = extraerDatoDouble(db, strIDPrestamo, tabla, "saldo_restante");
     interesesAbonados = extraerDatoDouble(db, strIDPrestamo, tabla, "intereses_abonados");
@@ -395,11 +394,12 @@ void reportePrestamos(sqlite3* db) {
     // Calculo del aporte al capital
     double aporteCapital = capital - saldoRestante;
 
-    cout.precision(3);
+    cout.precision(2);
     cout << fixed
          << "\nReporte de prestamos\n"
          << "ID del prestamo: " << strIDPrestamo << "\n"
          << "Capital inicial: " << capital << "\n"
+         << "Saldo restante: " << saldoRestante << "\n"
          << "Cuota mensual con interes: " << cuotaMensual << "\n"
          << "Cuota de interes mensual: " << cuotaInteresMensual << "\n"
          << "Cuotas Pagas: " << cuotasPagadas << "\n"
