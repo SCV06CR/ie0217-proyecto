@@ -51,7 +51,7 @@ int main() {
             cout << "|---------------------------------------------------------------------------|" << endl;
             cout << "|                             3.Salir del sistema                           |" << endl;
             cout << "|---------------------------------------------------------------------------|" << endl;
-            cout << "Ingrese la su selección: " << endl; 
+            cout << "Ingrese su selección: " << endl; 
             cin >> option;
             // Comprobamos si hubo un error de entrada
             if (cin.fail() || option < 1 || option > 3) {
