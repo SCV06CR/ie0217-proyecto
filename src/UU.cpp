@@ -11,6 +11,17 @@
 using namespace std;
 
 // ----- Código de AbrirDB -----
+/**
+ * @brief Abre una base de datos SQLite.
+ * 
+ * Esta función intenta abrir la base de datos especificada por el nombre. Si no puede abrirla, devuelve un puntero nulo
+ * y muestra un mensaje de error. Si la base de datos se abre correctamente, devuelve el puntero de la base de datos.
+ * 
+ * @param nombre El nombre de la base de datos a abrir.
+ * @return sqlite3* Puntero a la base de datos abierta o nullptr si ocurre un error.
+ * 
+ * @note Esta función utiliza SQLite3 para abrir la base de datos.
+ */
 sqlite3* abrirBaseDatos(const char* nombre) {
     sqlite3* db;
     if (sqlite3_open(nombre, &db) != SQLITE_OK) {
@@ -21,6 +32,17 @@ sqlite3* abrirBaseDatos(const char* nombre) {
 }
 
 // ----- Código de ConsultaDB -----
+/**
+ * @brief Consulta y muestra el contenido de una tabla en la base de datos SQLite.
+ * 
+ * Esta función ejecuta una consulta SQL para seleccionar todos los registros de la tabla especificada. Los resultados
+ * se imprimen en la consola con un formato tabular, donde se alinean las columnas de manera adecuada.
+ * 
+ * @param db Puntero a la base de datos SQLite que contiene la tabla.
+ * @param tabla Nombre de la tabla que se desea consultar.
+ * 
+ * @note Si la consulta o la preparación fallan, se muestra un mensaje de error.
+ */
 void consultarTabla(sqlite3* db, const char* tabla) {
     string sql = "SELECT * FROM ";
     sql += tabla;
@@ -60,6 +82,17 @@ void consultarTabla(sqlite3* db, const char* tabla) {
 }
 
 // ----- Código de Hash -----
+/**
+ * @brief Calcula el hash SHA-256 de una cadena de texto.
+ * 
+ * Esta función toma una cadena de entrada y calcula su hash utilizando el algoritmo SHA-256. El resultado se devuelve
+ * como una cadena de texto hexadecimal que representa el valor del hash.
+ * 
+ * @param input La cadena de texto a la que se le calculará el hash SHA-256.
+ * @return string El hash SHA-256 en formato hexadecimal.
+ * 
+ * @note Utiliza la biblioteca OpenSSL para calcular el hash.
+ */
 string hashSHA256(const string& input) {
     unsigned char hash[EVP_MAX_MD_SIZE]; // Arreglo para almacenar el hash resultante
     unsigned int length = 0;
