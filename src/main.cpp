@@ -27,71 +27,104 @@ int main() {
     crearTablas(db);
 
     do {
-        cout << "-----------------------------------------------------------------------------" << endl;
-        cout << "|                     Bienvenido al Sistema en ventanilla                   |" << endl;
-        cout << "-----------------------------------------------------------------------------" << endl;
-        cout << "|                                      |                                    |" << endl;
-        cout << "|                                      |                                    |" << endl;
-        cout << "|        1. Ingresar al Sistema        |        2. Crear una Cuenta         |" << endl;
-        cout << "|                                      |                                    |" << endl;
-        cout << "|                                      |                                    |" << endl;
-        cout << "-----------------------------------------------------------------------------" << endl;
-        cout << "|                                                                           |" << endl;
-        cout << "|                               Tipo de cambio:                             |" << endl;
-        cout << "|                               " << TipoCambio << "  CRC/USD                             |" << endl;
-        cout << "|---------------------------------------------------------------------------|" << endl;
-        cout << "|                             3.Salir del sistema                           |" << endl;
-        cout << "|---------------------------------------------------------------------------|" << endl;
-        cin >> option;
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    
+        try{
+            cout << "-----------------------------------------------------------------------------" << endl;
+            cout << "|                     Bienvenido al Sistema en ventanilla                   |" << endl;
+            cout << "-----------------------------------------------------------------------------" << endl;
+            cout << "|                                      |                                    |" << endl;
+            cout << "|                                      |                                    |" << endl;
+            cout << "|        1. Ingresar al Sistema        |        2. Crear una Cuenta         |" << endl;
+            cout << "|                                      |                                    |" << endl;
+            cout << "|                                      |                                    |" << endl;
+            cout << "-----------------------------------------------------------------------------" << endl;
+            cout << "|                                                                           |" << endl;
+            cout << "|                               Tipo de cambio:                             |" << endl;
+            cout << "|                               " << TipoCambio << "  CRC/USD                             |" << endl;
+            cout << "|---------------------------------------------------------------------------|" << endl;
+            cout << "|                             3.Salir del sistema                           |" << endl;
+            cout << "|---------------------------------------------------------------------------|" << endl;
+            cout << "Ingrese la su selección: " << endl; 
+            cin >> option;
+            // Comprobamos si hubo un error de entrada
+            if (cin.fail() || option < 1 || option > 3) {
+                throw invalid_argument("Opción inválida. Debe ingresar un número entre 1 y 3.");
+            }
+
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');  // Limpiar el buffer
+        } catch (const invalid_argument& e) {
+            cout << "Error: " << e.what() << endl;
+
+            // Limpiar el estado de error de cin y descartar la entrada restante
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');  // Limpiar el buffer
+
+            continue;  // Volver a mostrar el menú si la opción es inválida
+        }
+
         switch (option) {
             case 1: {
                 int id;
                 string password;
-
-                cout << "Ingrese el ID de la cuenta: ";
-                cin >> id;
-
-                cin.ignore();
-                cout << "Ingrese su Password: ";
-                getline(cin, password);
-
-                if (!verificarCuenta(db, id, password)) {
-                    break; // Volver al menú si la cuenta no se encuentra
-                }
-
-                int opcion1;
-                
-                 do {
-                    cout << "Ingrese el servicio que desea recibir: " << endl;
-                    cout << "1. Atención al cliente.\n2. Información general sobre Préstamos.\n3. Devolverse" << endl;
-
-                    cout << "Ingrese su selección: ";
-                    cin >> opcion1;
-
-                    switch (opcion1) {
-
-                        case 1:
-                            cout << "Ingresando al menú de atención al cliente..." << endl;
-                            showMenuAC(id, TipoCambio, db);
-                            break;
-
-                        case 2:
-                            cout << "Ingresando al menú de solicitud de prestamo..." << endl;
-                            showMenuSP(id, db);
-                            break;
-
-                        case 3:
-                            cout << "\nAquí se devuelve al menú anterior" << endl;
-                            break;
-
-                         default:
-                            cout << "\nOpción inválida...\nPor favor intente de nuevo.\n" << endl;
+                try {
+                    // Validar ID de cuenta
+                    cout << "Ingrese el ID de la cuenta: ";
+                    cin >> id;
+                    if (cin.fail()) {
+                        throw invalid_argument("ID no válido. Debe ser un número entero.");
                     }
-                } while (opcion1 != 3);
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');  // Limpiar el buffer
+
+                    // Validar contraseña
+                    cout << "Ingrese su Password: ";
+                    getline(cin, password);
+                    if (password.empty()) {
+                        throw invalid_argument("La contraseña no puede estar vacía.");
+                    }
+
+                    if (!verificarCuenta(db, id, password)) {
+                        cout << "Cuenta no encontrada. Por favor intente de nuevo." << endl;
+                        break; // Volver al menú
+                    }
+
+
+                    int opcion1;
+                
+                    do {
+                        cout << "Ingrese el servicio que desea recibir: " << endl;
+                        cout << "1. Atención al cliente.\n2. Información general sobre Préstamos.\n3. Devolverse" << endl;
+
+                        cout << "Ingrese su selección: ";
+                        cin >> opcion1;
+                        if (cin.fail()) {
+                            throw invalid_argument("Opción inválida. Debe ingresar un número.");
+                        }
+                        
+                        switch (opcion1) {
+
+                            case 1:
+                                cout << "Ingresando al menú de atención al cliente..." << endl;
+                                showMenuAC(id, TipoCambio, db);
+                                break;
+
+                            case 2:
+                                cout << "Ingresando al menú de solicitud de prestamo..." << endl;
+                                showMenuSP(id, db);
+                                break;
+
+                            case 3:
+                                cout << "\nAquí se devuelve al menú anterior" << endl;
+                                break;
+
+                            default:
+                                cout << "\nOpción inválida...\nPor favor intente de nuevo.\n" << endl;
+                        }
+                    } while (opcion1 != 3);
+                    break;
+                } catch (const invalid_argument& e) {
+                    cout << "Error: " << e.what() << endl;
+                }
                 break;
-            }   
+            }
             case 2:
                 gestionarCreacionCuenta(db);
                 cout << "\nConsultando las tablas después de crear la cuenta:\n";
