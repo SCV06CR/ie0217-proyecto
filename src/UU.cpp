@@ -137,6 +137,18 @@ string hashSHA256(const string& input) {
 }
 
 // ----- Código de TipoCambio -----
+/**
+ * @brief Genera un tipo de cambio aleatorio dentro de un rango dado.
+ * 
+ * Esta función genera un tipo de cambio aleatorio en un rango especificado. El tipo de cambio tiene una variación
+ * simulada dentro del rango entre el mínimo y máximo especificados.
+ * 
+ * @param min Valor mínimo del rango del tipo de cambio.
+ * @param max Valor máximo del rango del tipo de cambio.
+ * @return double Un valor aleatorio dentro del rango.
+ * 
+ * @note Esta función simula una variación en el tipo de cambio con un factor aleatorio.
+ */
 double generarTipoCambio(double min, double max) {
     // Generar un número simple en el rango de mínimo y máximo
     double randomFact = (1.0 * (max - min)) / 10; // Simular una varianza 
