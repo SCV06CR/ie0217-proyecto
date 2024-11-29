@@ -18,17 +18,20 @@ else
     endif
 endif
 
-TARGET = completo
+TARGET = ProyectoBancario
 SRCS = src/main.cpp src/CrearCuenta.cpp src/Verificacion.cpp src/AtencionCliente.cpp src/InformacionPrestamos.cpp src/UU.cpp src/baseDatos.cpp
 HEADERS = src/CrearCuenta.hpp src/Verificacion.hpp src/AtencionCliente.hpp src/InformacionPrestamos.hpp src/baseDatos.hpp
-OBJS = $(SRCS:.cpp=.o)
+OBJS = $(SRCS:src/%.cpp=obj/%.o)
 CC = g++
-CFLAGS = -Wall -std=c++11 $(INCLUDE)
+CFLAGS = -Wall -std=c++11 -w $(INCLUDE)  # Agregado -w para suprimir los warnings
 
+# Regla para crear el ejecutable
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LIBDIRS) $(LIBS)
 
-src/%.o: src/%.cpp
+# Regla para compilar los archivos fuente en la carpeta obj
+obj/%.o: src/%.cpp
+	@mkdir -p obj  # Asegura que la carpeta obj exista
 	$(CC) $(CFLAGS) -c $< -o $@
 
 run: $(TARGET)
@@ -48,5 +51,3 @@ else ifeq ($(OSFLAG), MAC)
 else
 	del /F /Q $(subst /,\,$(OBJS)) $(subst /,\,$(TARGET).exe)
 endif
-
-
