@@ -946,57 +946,95 @@ void AgregarMov(const int& id, const string& Detalle, sqlite3* db) {
 }
 
 // Funcion para desplegar el menu de opciones de atencion al cliente
-string showMenuAC(const int& idCuenta, const double& TipoCambio, sqlite3* db) {
+// Función para desplegar el menú de opciones de atención al cliente
+void showMenuAC(const int& idCuenta, const double& TipoCambio, sqlite3* db) {
     int opcion;
-    int idPrestamo;
-    int idDest;
 
     do {
-        cout << "Ingrese el servicio que desea recibir: " << endl;
-        cout << "1. Realizar depósito.\n2. Realizar retiro.\n3. Realizar transferencia.\n4. Realizar abono.\n5. Pagar cuota.\n6. Registrar salida del país.\n7. Consultar PIN.\n8. Consultar CVV.\n9. Imprimir estado de cuenta.\n10. Regresar al menú anterior.\n";
-        cin >> opcion;
+        try {
+            cout << "Ingrese el servicio que desea recibir: " << endl;
+            cout << "1. Realizar depósito." << endl;
+            cout << "2. Realizar retiro." << endl;
+            cout << "3. Realizar transferencia." << endl;
+            cout << "4. Realizar abono." << endl;
+            cout << "5. Pagar cuota." << endl;
+            cout << "6. Registrar salida del país." << endl;
+            cout << "7. Consultar PIN." << endl;
+            cout << "8. Consultar CVV." << endl;
+            cout << "9. Imprimir estado de cuenta." << endl;
+            cout << "10. Regresar al menú anterior." << endl;
+            cout << "Ingrese su selección: ";
+            cin >> opcion;
 
-        switch (opcion) {
-            case 1:
-                realizadDeposito(idCuenta, db);
-                break;
-            case 2:
-                realizadRetiro(idCuenta, db);
-                break;
-            case 3:
-                cout << "Ingrese el número de cuenta al que desea realizar la transferencia." << endl;
-                cin >> idDest;
-                realizadTransferencia(idCuenta, idDest, TipoCambio, db);
-                break;
-            case 4:
-                cout << "Ingrese el número de depósito" << endl;
-                cin >> idPrestamo;
-                realizarAbono(idPrestamo, TipoCambio, idCuenta,  db);
-                break;
-            case 5:
-                cout << "Ingrese el número de depósito" << endl;
-                cin >> idPrestamo;
-                pagarCuota(idPrestamo, idCuenta, TipoCambio, db);
-                break;
-            case 6:
-                registrarSalidaPais(idCuenta, db);
-                break;
-            case 7:
-                consultarPin(idCuenta, db);
-                break;
-            case 8:
-                consultarCVV(idCuenta, db);
-                break;
-            case 9:
-                imprimirEstadoCuenta(idCuenta, db);
-                break;
-            case 10:
-                cout << "Regresando..." << endl;
-                break;
-            default:
-                cout << "Opción no válida. Por favor, intente de nuevo." << endl;
-                break;
+            // Validar entrada
+            if (cin.fail() || opcion < 1 || opcion > 10) {
+                throw invalid_argument("Opción inválida. Debe ingresar un número entre 1 y 10.");
+            }
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Limpiar el buffer
+
+            switch (opcion) {
+                case 1:
+                    realizadDeposito(idCuenta, db);
+                    break;
+                case 2:
+                    realizadRetiro(idCuenta, db);
+                    break;
+                case 3: {
+                    int idDest;
+                    cout << "Ingrese el número de cuenta al que desea realizar la transferencia: ";
+                    cin >> idDest;
+                    if (cin.fail()) {
+                        throw invalid_argument("ID de cuenta destino no válido. Debe ser un número entero.");
+                    }
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Limpiar el buffer
+                    realizadTransferencia(idCuenta, idDest, TipoCambio, db);
+                    break;
+                }
+                case 4: {
+                    int idPrestamo;
+                    cout << "Ingrese el número de depósito: ";
+                    cin >> idPrestamo;
+                    if (cin.fail()) {
+                        throw invalid_argument("Número de depósito no válido. Debe ser un número entero.");
+                    }
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Limpiar el buffer
+                    realizarAbono(idPrestamo, TipoCambio, idCuenta, db);
+                    break;
+                }
+                case 5: {
+                    int idPrestamo;
+                    cout << "Ingrese el número de préstamo: ";
+                    cin >> idPrestamo;
+                    if (cin.fail()) {
+                        throw invalid_argument("Número de préstamo no válido. Debe ser un número entero.");
+                    }
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Limpiar el buffer
+                    pagarCuota(idPrestamo, idCuenta, TipoCambio, db);
+                    break;
+                }
+                case 6:
+                    registrarSalidaPais(idCuenta, db);
+                    break;
+                case 7:
+                    consultarPin(idCuenta, db);
+                    break;
+                case 8:
+                    consultarCVV(idCuenta, db);
+                    break;
+                case 9:
+                    imprimirEstadoCuenta(idCuenta, db);
+                    break;
+                case 10:
+                    cout << "Regresando al menú anterior..." << endl;
+                    break;
+                default:
+                    cout << "Opción no válida. Por favor, intente de nuevo." << endl;
+            }
+        } catch (const invalid_argument& e) {
+            cout << "Error: " << e.what() << endl;
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Limpiar el buffer
         }
     } while (opcion != 10);
-    return "";
 }
+

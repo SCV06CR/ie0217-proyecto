@@ -17,6 +17,6 @@ void registrarSalidaPais(const int& idCuenta, sqlite3* db);
 void consultarPin(const int& idCuenta, sqlite3* db);
 void consultarCVV(const int& idCuenta, sqlite3* db);
 void imprimirEstadoCuenta(const int& idCuenta, sqlite3* db); 
-string showMenuAC(const int& idCuenta, const double& TipoCambio, sqlite3* db); 
+void showMenuAC(const int& idCuenta, const double& TipoCambio, sqlite3* db);
 void AgregarMov(const int& id, const string& Detalle, sqlite3* db);
 #endif // ATENCIONCLIENTE_HPP
