@@ -20,7 +20,7 @@ endif
 
 TARGET = ProyectoBancario
 SRCS = src/main.cpp src/CrearCuenta.cpp src/Verificacion.cpp src/AtencionCliente.cpp src/InformacionPrestamos.cpp src/UU.cpp src/baseDatos.cpp
-HEADERS = src/CrearCuenta.hpp src/Verificacion.hpp src/AtencionCliente.hpp src/InformacionPrestamos.hpp src/baseDatos.hpp
+HEADERS = src/CrearCuenta.hpp src/UU.hpp src/Verificacion.hpp src/AtencionCliente.hpp src/InformacionPrestamos.hpp src/baseDatos.hpp
 OBJS = $(SRCS:src/%.cpp=obj/%.o)
 CC = g++
 CFLAGS = -Wall -std=c++11 -w $(INCLUDE)  # Agregado -w para suprimir los warnings
