@@ -15,30 +15,45 @@ int generarPrestamoID(int prefijo) {
 // Sub menu de gestion de prestamos
 // Recibe el id de la cuenta
 void showMenuSP(const int& idCuenta, sqlite3* db) {
-
     int opcion;
 
     do {
-        cout << "Ingrese el servicio que desea recibir: " << endl;
-        cout << "1. Solicitar un prestano.\n2. Generar reporte de pagos estimados.\n3. Regresar al menú anterior.\n";
-        cin >> opcion;
+        try {
+            cout << "Ingrese el servicio que desea recibir: " << endl;
+            cout << "1. Solicitar un préstamo." << endl;
+            cout << "2. Generar reporte de pagos estimados." << endl;
+            cout << "3. Regresar al menú anterior." << endl;
+            cout << "Ingrese su selección: ";
+            cin >> opcion;
 
-        switch (opcion) {
-            case 1:
-                gestionarPrestamo(db, idCuenta);
-                break;
-            case 2:
-                reportePrestamos(db);
-                break;
-            case 3:
-                cout << "Regresando..." << endl;
-                break;
-            default:
-                cout << "Opción no válida. Por favor, intente de nuevo." << endl;
-                break;
+            // Validación de entrada
+            if (cin.fail() || opcion < 1 || opcion > 3) {
+                throw invalid_argument("Opción inválida. Debe ingresar un número entre 1 y 3.");
+            }
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Limpiar el buffer
+
+            switch (opcion) {
+                case 1:
+                    gestionarPrestamo(db, idCuenta);
+                    break;
+                case 2:
+                    reportePrestamos(db);
+                    break;
+                case 3:
+                    cout << "Regresando al menú anterior..." << endl;
+                    break;
+                default:
+                    // Este caso no debería ocurrir debido a la validación previa
+                    cout << "Opción no válida. Por favor, intente de nuevo." << endl;
+            }
+        } catch (const invalid_argument& e) {
+            cout << "Error: " << e.what() << endl;
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Limpiar el buffer
         }
     } while (opcion != 3);
 }
+
 
 // Sub menu de solicitud de prestamos
 void gestionarPrestamo(sqlite3* db, const int& idCuenta) {
