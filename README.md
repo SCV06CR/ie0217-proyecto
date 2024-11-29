@@ -10,13 +10,66 @@
 </p>
 
 ## Tabla de contenidos
-- [Primera Fase del Proyecto - Parte Teórica](#primera-fase-del-proyecto-parte-teórica)
+- [Instrucciones para la ejecución](#instrucciones-para-la-ejecución)
+- [Primera Fase del Proyecto - Parte Teórica](#primera-fase-del-proyecto)
 - [Definición de términos e ideas](#definición-de-términos-e-ideas)
 - [Primera Fase del Proyecto - Parte de Diseño](#primera-fase-del-proyecto-parte-de-diseño)
+- [Pruebas de Ejecución del programa](#purebas-de-ejecución-del-programa)
 - [Cronograma de actividades](#cronograma-de-actividades)
 - [Referencias](#referencias)
 
-## Primera Fase del Proyecto - Parte Teórica
+## Instrucciones para la ejecución 
+
+El código funciona mediante el uso de Makefile mediante los siguientes comandos:
+
+**Aegúrese de estar dentro del repositorio dedicado al proyecto**
+
+```bash
+# Debe ubicarse en el mismo nivel en donde se encuentra el Makefile
+cd ./ie0217-proyecto
+```
+**Puede ejecutar, dependiendo de su sistema opetarivo:**
+
+**Windows**
+
+```
+mingw32-make run
+```
+
+**Mac - Linux**
+```
+make run
+```
+
+
+**El Makefile cuenta con la capacidad de distingir el os con el que se trabaja**
+
+
+```makefile
+ifeq ($(OS), Windows_NT)
+    OSFLAG = WINDOWS
+    INCLUDE = -IC:\sqlite -IC:\Program-Files\OpenSSL-Win64\include
+    LIBDIRS = -LC:\sqlite -LC:\Program-Files\OpenSSL-Win64
+    LIBS = -lsqlite3 -lssl -lcrypto
+else
+    UNAME_S := $(shell uname -s)
+    ifeq ($(UNAME_S), Darwin)  # macOS
+        OSFLAG = MAC
+        INCLUDE = -I/opt/homebrew/opt/sqlite/include -I/opt/homebrew/opt/openssl@3/include
+        LIBDIRS = -L/opt/homebrew/opt/sqlite/lib -L/opt/homebrew/opt/openssl@3/lib
+        LIBS = -lsqlite3 -lssl -lcrypto
+    else
+        OSFLAG = LINUX
+        INCLUDE = -I/usr/include
+        LIBDIRS = -L/usr/lib
+        LIBS = -lsqlite3 -lssl -lcrypto
+    endif
+endif
+```
+
+## Primera Fase del Proyecto 
+
+## Parte Teórica
 
 ## Definición de términos e ideas
 Para tener una idea clara de lo que se quiere realizar es necesario definir los términos utilizados dentro de este proyecto, por lo tanto, se debe investigar y definir cada uno de ellos y determinar qué conllevan y cómo se implementan. Esto con el fin de que, a la hora de implementarlos dentro del código, ya sea como una función o de alguna otra forma, estos sean realistas y se apeguen a un funcionamiento real.
@@ -167,9 +220,69 @@ Concluida la sección teórica, se detalla el diseño que el programa de gestió
 
 
 
-## Purebas de ejecución del programa: 
+## Purebas de ejecución del programa 
+
+- Ejecucion principal del programa: 
+
+![alt text](imagenes/Ejecucion1.png)
+
+- Manejo de errores en el Main:
+
+![alt text](imagenes/ManejoErroresMainM.png)
 
 
+- Creacion de cuenta en colones: 
+
+![alt text](imagenes/CreacioncuentaColones.png)
+
+
+- Creacion de cuenta en colones y dolares: 
+
+
+![alt text](imagenes/CrearCuentaDyC.png)
+
+- ID inválido: 
+
+![alt text](imagenes/IDinvalido.png)
+
+- Manejo Errores en el menú secundario: 
+
+![alt text](imagenes/ManejoErrorMenuSecundario.png)
+
+- Deposito y Estado de cuenta: 
+
+![alt text](imagenes/depositoyestadcuenta.png)
+
+
+- Retiro con error y sin error: 
+
+![alt text](imagenes/Retiroerrorybueno.png)
+
+- Salida del país: 
+
+![alt text](imagenes/SalidaPaisPin.png)
+
+- Error Prestamos: 
+
+
+![alt text](imagenes/Errorprestamos.png)
+
+- Prueba Préstamo: 
+
+![alt text](imagenes/pruebaprestamo.png)
+
+- Prueba Transferencia: 
+
+![alt text](imagenes/PruebaTransferencia.png)
+
+- Abono: 
+
+![alt text](imagenes/Abono.png)
+
+
+- Pago de cuota: 
+
+![alt text](imagenes/PagoCuota.png)
 
 
 ## Bitácora:
@@ -193,54 +306,6 @@ Concluida la sección teórica, se detalla el diseño que el programa de gestió
 | 27/11/24  | Rodrigo Sanchez Araya   | Se agrega funcionalidad para agregar movimientos la tabla dedicada, se agrega manejo de errores al menú main y al menú de atención al cliente.  |
 
 
-### Uso del codigo 
-
-El código funciona mediante el uso de Makefile mediante los siguientes comandos:
-
-**Aegúrese de estar dentro del repositorio dedicado al proyecto**
-
-```bash
-# Debe ubicarse en el mismo nivel en donde se encuentra el Makefile
-cd ./ie0217-proyecto
-```
-**Puede ejecutar, dependiendo de su sistema opetarivo:**
-
-**Windows**
-
-```
-mingw32-make run
-```
-
-**Mac - Linux**
-```
-make run
-```
-
-
-**El Makefile cuenta con la capacidad de distingir el os con el que se trabaja**
-
-
-```makefile
-ifeq ($(OS), Windows_NT)
-    OSFLAG = WINDOWS
-    INCLUDE = -IC:\sqlite -IC:\Program-Files\OpenSSL-Win64\include
-    LIBDIRS = -LC:\sqlite -LC:\Program-Files\OpenSSL-Win64
-    LIBS = -lsqlite3 -lssl -lcrypto
-else
-    UNAME_S := $(shell uname -s)
-    ifeq ($(UNAME_S), Darwin)  # macOS
-        OSFLAG = MAC
-        INCLUDE = -I/opt/homebrew/opt/sqlite/include -I/opt/homebrew/opt/openssl@3/include
-        LIBDIRS = -L/opt/homebrew/opt/sqlite/lib -L/opt/homebrew/opt/openssl@3/lib
-        LIBS = -lsqlite3 -lssl -lcrypto
-    else
-        OSFLAG = LINUX
-        INCLUDE = -I/usr/include
-        LIBDIRS = -L/usr/lib
-        LIBS = -lsqlite3 -lssl -lcrypto
-    endif
-endif
-```
 ### Referencias 
 
 1. Billin. (2018). Simulador de préstamos personales y empresas - Calculadora Billin. https://www.billin.net/simulador-prestamos-personales-calculadora/
