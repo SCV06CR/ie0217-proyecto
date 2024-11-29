@@ -1,47 +1,52 @@
-# Opciones de compilacion
+ifeq ($(OS), Windows_NT)
+    OSFLAG = WINDOWS
+    INCLUDE = -IC:\sqlite -IC:\Program-Files\OpenSSL-Win64\include
+    LIBDIRS = -LC:\sqlite -LC:\Program-Files\OpenSSL-Win64
+    LIBS = -lsqlite3 -lssl -lcrypto
+else
+    UNAME_S := $(shell uname -s)
+    ifeq ($(UNAME_S), Darwin)  # macOS
+        OSFLAG = MAC
+        INCLUDE = -I/opt/homebrew/opt/sqlite/include -I/opt/homebrew/opt/openssl@3/include
+        LIBDIRS = -L/opt/homebrew/opt/sqlite/lib -L/opt/homebrew/opt/openssl@3/lib
+        LIBS = -lsqlite3 -lssl -lcrypto
+    else
+        OSFLAG = LINUX
+        INCLUDE = -I/usr/include
+        LIBDIRS = -L/usr/lib
+        LIBS = -lsqlite3 -lssl -lcrypto
+    endif
+endif
+
+TARGET = completo
+SRCS = src/main.cpp src/CrearCuenta.cpp src/Verificacion.cpp src/AtencionCliente.cpp src/InformacionPrestamos.cpp src/UU.cpp src/baseDatos.cpp
+HEADERS = src/CrearCuenta.hpp src/Verificacion.hpp src/AtencionCliente.hpp src/InformacionPrestamos.hpp src/baseDatos.hpp
+OBJS = $(SRCS:.cpp=.o)
 CC = g++
-CXXFLAGS = -std=c++11 -Wall
-LDFLAGS = -lsqlite3 -lssl -lcrypto
+CFLAGS = -Wall -std=c++11 $(INCLUDE)
 
-# Makefile settings
-TARGET = .\obj\ejecutable
-EXT = .cpp
-SRCDIR = src
-OBJDIR = obj
+$(TARGET): $(OBJS)
+	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LIBDIRS) $(LIBS)
 
+src/%.o: src/%.cpp
+	$(CC) $(CFLAGS) -c $< -o $@
 
-SRC = $(wildcard $(SRCDIR)/*$(EXT))
-OBJ = $(SRC:$(SRCDIR)/%$(EXT)=$(OBJDIR)/%.o)
-
-# Variables para UNIX OS
-RM = rm
-DELOBJ = $(OBJ)
-# Variable para Windows
-DEL = del
-EXE = .exe
-WDELOBJ = $(SRC:$(SRCDIR)/%$(EXT)=$(OBJDIR)\\%.o)
-
-# Compilacion y ejecucion
-all: $(TARGET) run
-
-$(TARGET): $(OBJ)
-	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
-
-
-$(OBJDIR)/%.o: $(SRCDIR)/%$(EXT)
-	$(CC) $(CXXFLAGS) -o $@ -c $<
-
-run:
+run: $(TARGET)
+ifeq ($(OSFLAG), LINUX)
 	./$(TARGET)
+else ifeq ($(OSFLAG), MAC)
+	./$(TARGET)
+else
+	$(TARGET).exe
+endif
 
-################### Cleaning rules for Unix-based OS ###################
-# Borra los archivos .o y .exe
-.PHONY: clean
 clean:
-	$(RM) $(DELOBJ) $(TARGET)
+ifeq ($(OSFLAG), LINUX)
+	rm -f $(OBJS) $(TARGET)
+else ifeq ($(OSFLAG), MAC)
+	rm -f $(OBJS) $(TARGET)
+else
+	del /F /Q $(subst /,\,$(OBJS)) $(subst /,\,$(TARGET).exe)
+endif
 
-#################### Cleaning rules for Windows OS #####################
-# Borra los archivos .o y .exe
-.PHONY: cleanw
-cleanw:
-	$(DEL) $(WDELOBJ)  $(TARGET)$(EXE)
+
