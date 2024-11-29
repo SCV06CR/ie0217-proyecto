@@ -87,8 +87,90 @@ Concluida la sección teórica, se detalla el diseño que el programa de gestió
 
 ![Diagrama de Flujo Proyecto](imagenes/DIagramaProyecto.png)
 
+
+# Esquema de la Base de Datos
+
+## Tabla: `Cuenta_Colones`
+| Columna          | Tipo       | Restricciones                                                   |
+|------------------|------------|-----------------------------------------------------------------|
+| `id`             | INTEGER    | PRIMARY KEY, CHECK(id BETWEEN 0 AND 999999999), NOT NULL       |
+| `nombre`         | TEXT       | NOT NULL                                                      |
+| `salida_pais`    | BOOLEAN    | NOT NULL, CHECK(salida_pais IN (0, 1))                         |
+| `cantidad_dinero`| INTEGER    | NOT NULL, CHECK(cantidad_dinero >= 0), DEFAULT 0               |
+| `cvv`            | INTEGER    | NOT NULL, CHECK(cvv BETWEEN 100 AND 999)                      |
+| `password`       | TEXT       | NOT NULL                                                      |
+
+---
+
+## Tabla: `Cuenta_Dolares`
+| Columna          | Tipo       | Restricciones                                                   |
+|------------------|------------|-----------------------------------------------------------------|
+| `id`             | INTEGER    | PRIMARY KEY, CHECK(id BETWEEN 0 AND 999999999), NOT NULL       |
+| `nombre`         | TEXT       | NOT NULL                                                      |
+| `salida_pais`    | BOOLEAN    | NOT NULL, CHECK(salida_pais IN (0, 1))                         |
+| `cantidad_dinero`| INTEGER    | NOT NULL, CHECK(cantidad_dinero >= 0), DEFAULT 0               |
+| `cvv`            | INTEGER    | NOT NULL, CHECK(cvv BETWEEN 100 AND 999)                      |
+| `password`       | TEXT       | NOT NULL                                                      |
+
+---
+
+## Tabla: `Movimientos_Colones`
+| Columna          | Tipo       | Restricciones                                                   |
+|------------------|------------|-----------------------------------------------------------------|
+| `id_cuenta`      | INTEGER    | NOT NULL, FOREIGN KEY REFERENCES `Cuenta_Colones(id)` ON DELETE CASCADE |
+| `detalle`        | TEXT       | NOT NULL                                                      |
+| `fecha`          | TEXT       | DEFAULT CURRENT_TIMESTAMP, NOT NULL                           |
+
+---
+
+## Tabla: `Movimientos_dolares`
+| Columna          | Tipo       | Restricciones                                                   |
+|------------------|------------|-----------------------------------------------------------------|
+| `id_cuenta`      | INTEGER    | NOT NULL, FOREIGN KEY REFERENCES `Cuenta_Dolares(id)` ON DELETE CASCADE |
+| `detalle`        | TEXT       | NOT NULL                                                      |
+| `fecha`          | TEXT       | DEFAULT CURRENT_TIMESTAMP, NOT NULL                           |
+
+---
+
+## Tabla: `Prestamos_Colones`
+| Columna            | Tipo       | Restricciones                                                   |
+|--------------------|------------|-----------------------------------------------------------------|
+| `id_prestamo`      | INTEGER    | PRIMARY KEY, CHECK(id_prestamo BETWEEN 0 AND 999999999), NOT NULL |
+| `id_cuenta`        | INTEGER    | NOT NULL, FOREIGN KEY REFERENCES `Cuenta_Colones(id)` ON DELETE CASCADE |
+| `intereses`        | REAL       | NOT NULL                                                      |
+| `meses`            | INTEGER    | NOT NULL                                                      |
+| `monto`            | REAL       | NOT NULL                                                      |
+| `intereses_abonados`| REAL      | NOT NULL                                                      |
+| `saldo_restante`   | REAL       | NOT NULL, CHECK(saldo_restante >= 0)                          |
+| `tipo_prestamo`    | TEXT       | NOT NULL                                                      |
+| `monto_por_cuota`  | FLOAT      | NOT NULL, CHECK(monto_por_cuota >= 0)                         |
+| `cuotas_pagadas`   | INTEGER    | NOT NULL, CHECK(cuotas_pagadas >= 0)                          |
+
+---
+
+## Tabla: `Prestamos_Dolares`
+| Columna            | Tipo       | Restricciones                                                   |
+|--------------------|------------|-----------------------------------------------------------------|
+| `id_prestamo`      | INTEGER    | PRIMARY KEY, CHECK(id_prestamo BETWEEN 0 AND 999999999), NOT NULL |
+| `id_cuenta`        | INTEGER    | NOT NULL, FOREIGN KEY REFERENCES `Cuenta_Dolares(id)` ON DELETE CASCADE |
+| `intereses`        | REAL       | NOT NULL                                                      |
+| `meses`            | INTEGER    | NOT NULL                                                      |
+| `monto`            | REAL       | NOT NULL                                                      |
+| `intereses_abonados`| REAL      | NOT NULL                                                      |
+| `saldo_restante`   | REAL       | NOT NULL, CHECK(saldo_restante >= 0)                          |
+| `tipo_prestamo`    | TEXT       | NOT NULL                                                      |
+| `monto_por_cuota`  | REAL       | NOT NULL, CHECK(monto_por_cuota >= 0)                         |
+| `cuotas_pagadas`   | INTEGER    | NOT NULL, CHECK(cuotas_pagadas >= 0)                          |
+
 ## Cronograma de actividades
 ![Cronograma de Actividades](imagenes/Cronograma.jpg)
+
+
+
+## Purebas de ejecución del programa: 
+
+
+
 
 ## Bitácora:
 
@@ -108,12 +190,20 @@ Concluida la sección teórica, se detalla el diseño que el programa de gestió
 | 08/11/24  | Jonathan Monge Cascante    | Implementación de submenú de prestamos personales en colones o dólares y desarrollo de función para inserción de datos de prestamos en tablas.  |
 | 26/11/24  | Rodrigo Sánchez Araya    | Ajuste en la estructura de las bases de datos de movimientos (se crea una para movimientos de cuentas en colones y otra para dólares) ajuste en la estructura de las tablas de préstamos (se agrega cant de cuotas por pagar y pagadas), se hace la implementación de las funciones de realizar un abono a un crédito, realizar el pago de una cuota, se agrega la funcion de settear un movimiento y se establece la manera de imprimir los reportes de movimientos. |
 | 27/11/24  | Sergio Castillo Víquez    | Creación de UU.cpp archivo que une en uno solo los siguientes codigos AbrirDB.cpp y .hpp, ConsultasDB.cpp y .hpp, TipoCambio.cpp y .hpp y Hash.cpp y .hpp   |
-
+| 27/11/24  | Rodrigo Sanchez Araya   | Se agrega funcionalidad para agregar movimientos la tabla dedicada, se agrega manejo de errores al menú main y al menú de atención al cliente.  |
 
 
 ### Uso del codigo 
 
 El código funciona mediante el uso de Makefile mediante los siguientes comandos:
+
+**Aegúrese de estar dentro del repositorio dedicado al proyecto**
+
+```bash
+# Debe ubicarse en el mismo nivel en donde se encuentra el Makefile
+cd ./ie0217-proyecto
+```
+**Puede ejecutar, dependiendo de su sistema opetarivo:**
 
 **Windows**
 
@@ -126,6 +216,31 @@ mingw32-make run
 make run
 ```
 
+
+**El Makefile cuenta con la capacidad de distingir el os con el que se trabaja**
+
+
+```makefile
+ifeq ($(OS), Windows_NT)
+    OSFLAG = WINDOWS
+    INCLUDE = -IC:\sqlite -IC:\Program-Files\OpenSSL-Win64\include
+    LIBDIRS = -LC:\sqlite -LC:\Program-Files\OpenSSL-Win64
+    LIBS = -lsqlite3 -lssl -lcrypto
+else
+    UNAME_S := $(shell uname -s)
+    ifeq ($(UNAME_S), Darwin)  # macOS
+        OSFLAG = MAC
+        INCLUDE = -I/opt/homebrew/opt/sqlite/include -I/opt/homebrew/opt/openssl@3/include
+        LIBDIRS = -L/opt/homebrew/opt/sqlite/lib -L/opt/homebrew/opt/openssl@3/lib
+        LIBS = -lsqlite3 -lssl -lcrypto
+    else
+        OSFLAG = LINUX
+        INCLUDE = -I/usr/include
+        LIBDIRS = -L/usr/lib
+        LIBS = -lsqlite3 -lssl -lcrypto
+    endif
+endif
+```
 ### Referencias 
 
 1. Billin. (2018). Simulador de préstamos personales y empresas - Calculadora Billin. https://www.billin.net/simulador-prestamos-personales-calculadora/
