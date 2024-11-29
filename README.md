@@ -108,6 +108,14 @@ Concluida la sección teórica, se detalla el diseño que el programa de gestió
 | 08/11/24  | Jonathan Monge Cascante    | Implementación de submenú de prestamos personales en colones o dólares y desarrollo de función para inserción de datos de prestamos en tablas.  |
 | 26/11/24  | Rodrigo Sánchez Araya    | Ajuste en la estructura de las bases de datos de movimientos (se crea una para movimientos de cuentas en colones y otra para dólares) ajuste en la estructura de las tablas de préstamos (se agrega cant de cuotas por pagar y pagadas), se hace la implementación de las funciones de realizar un abono a un crédito, realizar el pago de una cuota, se agrega la funcion de settear un movimiento y se establece la manera de imprimir los reportes de movimientos. |
 
+### Uso del codigo 
+
+El código funciona mediante el uso de Makefile mediante los siguientes comandos:
+
+```
+
+```
+
 
 
 ### Referencias 
