@@ -6,8 +6,28 @@
 using namespace std; 
 
 
-// Esta funcion recibe como argumentos el id de la cuenta a la que se le quiere hacer un deposito
-// Recibe como argumento el monto a depositar y recibe la base de datos a la cual se le va a ingresar el dinero. 
+/**
+ * @brief Realiza un depósito en una cuenta bancaria.
+ * 
+ * Esta función permite depositar dinero en una cuenta bancaria. Determina el tipo de cuenta
+ * (colones o dólares) a partir de los primeros tres dígitos del ID de la cuenta, actualiza
+ * el saldo de la cuenta correspondiente en la base de datos y registra el movimiento en
+ * el historial de transacciones.
+ * 
+ * @param id El ID de la cuenta a la que se realizará el depósito.
+ *           Los primeros tres dígitos determinan el tipo de cuenta:
+ *           - 100: Cuenta en colones.
+ *           - 200: Cuenta en dólares.
+ * @param db Un puntero a la base de datos SQLite donde se actualizará el saldo de la cuenta.
+ * 
+ * @details
+ * - La función solicita al usuario el monto a depositar.
+ * - Actualiza el saldo de la cuenta en la tabla correspondiente (`Cuenta_Colones` o `Cuenta_Dolares`).
+ * - Registra el movimiento del depósito en la tabla de movimientos utilizando la función `AgregarMov`.
+ * 
+ * @throws Error en caso de problemas al preparar o ejecutar la consulta SQL.
+ * 
+ */ 
 void realizadDeposito(const int& id, sqlite3* db){
     //En primer lugar, saber que tipo de cuenta es
     // si los primeros numeros son 100 es cuenta en colones 
@@ -65,9 +85,32 @@ void realizadDeposito(const int& id, sqlite3* db){
 
 }
 
-// Esta funcion recibe como argumentos el id de la cuenta a la que se le quiere hacer un deposito
-// Recibe como argumento el monto a depositar
-// Recibe la base de datos donde existe la cuenta a la cual se le va a ingresar el dinero.
+/**
+ * @brief Realiza un retiro de una cuenta bancaria.
+ * 
+ * Esta función permite retirar dinero de una cuenta bancaria. Determina el tipo de cuenta
+ * (colones o dólares) a partir de los primeros tres dígitos del ID de la cuenta, verifica 
+ * si hay suficiente saldo disponible y actualiza el saldo de la cuenta correspondiente 
+ * en la base de datos. Además, registra el movimiento en el historial de transacciones.
+ * 
+ * @param id El ID de la cuenta de la cual se realizará el retiro.
+ *           Los primeros tres dígitos determinan el tipo de cuenta:
+ *           - 100: Cuenta en colones.
+ *           - 200: Cuenta en dólares.
+ * @param db Un puntero a la base de datos SQLite donde se actualizará el saldo de la cuenta.
+ * 
+ * @details
+ * - La función solicita al usuario el monto que desea retirar.
+ * - Verifica que haya fondos suficientes en la cuenta antes de realizar el retiro.
+ * - Si hay fondos suficientes, actualiza el saldo de la cuenta en la tabla correspondiente
+ *   (`Cuenta_Colones` o `Cuenta_Dolares`) y registra el movimiento del retiro en la tabla
+ *   de movimientos utilizando la función `AgregarMov`.
+ * - Si no hay fondos suficientes, informa al usuario y registra un movimiento indicando 
+ *   el intento fallido.
+ * 
+ * @throws Error en caso de problemas al preparar o ejecutar la consulta SQL.
+ * 
+ */
 void realizadRetiro(const int& id, sqlite3* db){
     int colones = 100; 
     int dolares = 200; 
@@ -185,10 +228,24 @@ void realizadRetiro(const int& id, sqlite3* db){
     }
 }
 
-// El primer const id es para la cuenta de origen 
-// El segundo const id es para la cuenta destino 
-// se recibe el monto a transferir 
-// Recibe la base de datos donde existe la cuenta a la cual se le va a ingresar el dinero.
+/**
+ * @brief Realiza una transferencia de dinero entre dos cuentas bancarias.
+ * 
+ * Esta función permite transferir dinero desde una cuenta de origen a una cuenta de destino.
+ * Verifica que la cuenta de origen tenga saldo suficiente, maneja conversiones entre colones 
+ * y dólares según el tipo de cambio proporcionado, y actualiza los saldos en la base de datos.
+ * Además, registra los movimientos de la operación en la tabla de movimientos.
+ * 
+ * @param idOrigen ID de la cuenta de origen de la transferencia.
+ * @param idDestino ID de la cuenta de destino de la transferencia.
+ * @param TipoCambio Tipo de cambio para la conversión entre colones y dólares.
+ *                   Debe ser un valor positivo y mayor que cero.
+ * @param db Puntero a la base de datos SQLite donde se encuentran las cuentas.
+ * 
+ * 
+ * @note La función registra un movimiento en la tabla de movimientos, incluso en caso de errores 
+ *       como fondos insuficientes.
+ */
 void realizadTransferencia(const int& idOrigen, const int& idDestino, const double& TipoCambio, sqlite3* db) {
     int colones = 100; 
     int dolares = 200; 
@@ -347,10 +404,33 @@ void realizadTransferencia(const int& idOrigen, const int& idDestino, const doub
 }
 
 
-// El primer const id es del préstamo
-// El segundo const id es de la cuenta
-// se recibe el monto para abonar
-// Recibe la base de datos donde existe la cuenta y el préstamo.
+/**
+ * @brief Realiza un abono a un préstamo desde una cuenta bancaria.
+ * 
+ * La función realiza un abono desde una cuenta bancaria hacia un préstamo, 
+ * manejando conversiones de moneda según el tipo de cambio proporcionado y 
+ * asegurándose de que la cuenta no quede con saldo negativo. También calcula 
+ * y actualiza la cuota mensual del préstamo tras el abono.
+ * 
+ * @param idPrestamo ID del préstamo al que se desea abonar.
+ * @param TipoCambio Tipo de cambio para la conversión entre colones y dólares.
+ *                   Debe ser un valor positivo mayor que cero.
+ * @param idCuenta ID de la cuenta desde la cual se realizará el abono.
+ * @param db Puntero a la base de datos SQLite que contiene la información de préstamos y cuentas.
+ * 
+ * @note Los primeros tres dígitos del ID de la cuenta determinan el tipo de cuenta:
+ *       - `100`: Cuenta en colones.
+ *       - `200`: Cuenta en dólares.
+ * 
+ * @note Si la cuenta y el préstamo están en diferentes monedas, se realiza una conversión 
+ *       utilizando el tipo de cambio proporcionado.
+ * 
+ * @note La función redondea los valores monetarios a dos decimales para evitar errores de precisión.
+ * 
+ * 
+ * 
+ * @see AgregarMov para registrar movimientos en la base de datos.
+ */
 void realizarAbono(const int& idPrestamo, const double& TipoCambio, const int& idCuenta, sqlite3* db) {
     // Determinar el tipo de cuenta según el prefijo del ID
     string idCuentaStr = to_string(idCuenta);
@@ -529,9 +609,27 @@ void realizarAbono(const int& idPrestamo, const double& TipoCambio, const int& i
     AgregarMov(idCuenta, detalleTexto, db);
 }
 
-// El primer const id es del préstamo
-// El segundo const id es de la cuenta
-// Recibe la base de datos donde existe la cuenta y el préstamo.
+/**
+ * @brief Realiza el pago de una cuota de préstamo desde una cuenta especificada.
+ * 
+ * Esta función consulta los detalles de un préstamo, valida que la cuenta tenga fondos suficientes
+ * para realizar el pago y actualiza tanto la cuenta como el préstamo correspondiente.
+ * Además, se asegura de que el monto a pagar esté correctamente calculado, tomando en cuenta el tipo de cuenta
+ * (Colones o Dólares) y el tipo de cambio si es necesario.
+ *
+ * @param idPrestamo ID único del préstamo a pagar.
+ * @param idCuenta ID único de la cuenta desde la cual se realiza el pago.
+ * @param TipoCambio Tipo de cambio actual entre Colones y Dólares (se usa si la cuenta es en una moneda y el préstamo en otra).
+ * @param db Puntero a la base de datos SQLite donde se encuentran las tablas de cuentas y préstamos.
+ * 
+ * @note El tipo de cuenta se determina a partir de los primeros 3 caracteres del ID de la cuenta:
+ *       - "100" es una cuenta en Colones.
+ *       - "200" es una cuenta en Dólares.
+ * 
+ * @note La función no realiza el pago si no hay fondos suficientes en la cuenta para cubrir el monto de la cuota,
+ *          o si la cuota no se puede pagar debido a un error en la consulta de la base de datos.
+ * 
+ */
 void pagarCuota(const int& idPrestamo, const int& idCuenta, const double& TipoCambio, sqlite3* db) {
     // Determinar el tipo de cuenta según el prefijo del ID
     string idCuentaStr = to_string(idCuenta);
@@ -712,8 +810,20 @@ void pagarCuota(const int& idPrestamo, const int& idCuenta, const double& TipoCa
 }
 
 
-// Recibe el id de la cuenta la cual se quiere registrar una salida del pais 
-// Recibe la base de datos donde existe la cuenta
+/**
+ * @brief Registra el permiso de salida del país para una cuenta.
+ * 
+ * Esta función actualiza el campo `salida_pais` de la cuenta en la base de datos para indicar
+ * que la cuenta tiene permiso para realizar una salida del país. El tipo de cuenta (Colones o Dólares)
+ * se determina según los primeros tres dígitos del ID de la cuenta.
+ *
+ * @param idCuenta ID de la cuenta para la cual se desea registrar el permiso de salida del país.
+ * @param db Puntero a la base de datos SQLite donde se encuentran las cuentas.
+ * 
+ * @note Si el ID de la cuenta comienza con "100", se considera una cuenta en Colones.
+ *       Si comienza con "200", se considera una cuenta en Dólares.
+ * 
+ */
 void registrarSalidaPais(const int& idCuenta, sqlite3* db) {
     // En primer lugar, saber qué tipo de cuenta es
     
@@ -753,8 +863,21 @@ void registrarSalidaPais(const int& idCuenta, sqlite3* db) {
 }
 
 
-// Recibe el id de la cuenta la cual se quiere consultar PIN del cajero 
-// Recibe la base de datos donde existe la cuenta
+/**
+ * @brief Consulta el PIN de una cuenta en la base de datos.
+ * 
+ * Esta función busca el PIN de la cuenta especificada, dependiendo de si la cuenta es en Colones
+ * o en Dólares, utilizando los primeros tres dígitos del ID de la cuenta para determinar el tipo de cuenta.
+ * Si el ID comienza con "100", se consulta en la tabla de cuentas en colones, si comienza con "200",
+ * se consulta en la tabla de cuentas en dólares.
+ *
+ * @param idCuenta ID de la cuenta para la cual se desea consultar el PIN.
+ * @param db Puntero a la base de datos SQLite donde se encuentran las cuentas.
+ * 
+ * @note Si el ID de la cuenta comienza con "100", se consulta la tabla `Cuenta_Colones`.
+ *       Si comienza con "200", se consulta la tabla `Cuenta_Dolares`.
+ * 
+ */
 void consultarPin(const int& idCuenta, sqlite3* db) {
     // En primer lugar, saber qué tipo de cuenta es
     // Si los primeros números son 100, es cuenta en colones
@@ -796,8 +919,20 @@ void consultarPin(const int& idCuenta, sqlite3* db) {
 }
 
 
-// Recibe el id de la cuenta la cual se quiere consultar el CVV
-// Recibe la base de datos donde existe la cuenta
+/**
+ * @brief Consulta el CVV (o PIN) de una cuenta en la base de datos.
+ * 
+ * Esta función busca el CVV de la cuenta especificada, dependiendo de si la cuenta es en Colones
+ * o en Dólares, utilizando los primeros tres dígitos del ID de la cuenta para determinar el tipo de cuenta.
+ * Si el ID comienza con "100", se consulta en la tabla de cuentas en colones, si comienza con "200",
+ * se consulta en la tabla de cuentas en dólares.
+ *
+ * @param idCuenta ID de la cuenta para la cual se desea consultar el CVV.
+ * @param db Puntero a la base de datos SQLite donde se encuentran las cuentas.
+ * 
+ * @note Si el ID de la cuenta comienza con "100", se consulta la tabla `Cuenta_Colones`.
+ *       Si comienza con "200", se consulta la tabla `Cuenta_Dolares`.
+ */
 void consultarCVV(const int& idCuenta, sqlite3* db) {
     // En primer lugar, saber qué tipo de cuenta es
     // Si los primeros números son 100, es cuenta en colones
@@ -839,8 +974,21 @@ void consultarCVV(const int& idCuenta, sqlite3* db) {
 }
 
 
-// Recibe el id de la cuenta que se quiere realizar la impresión del estado de cuenta
-// Recibe una base de datos 
+/**
+ * @brief Imprime el estado de cuenta de un usuario, mostrando los detalles y fechas de los movimientos registrados.
+ * 
+ * Esta función consulta la base de datos para obtener los movimientos de la cuenta, ya sea en colones o en dólares,
+ * según el prefijo del ID de la cuenta. Los resultados se imprimen en un formato tabular con los detalles de cada movimiento,
+ * incluyendo la fecha en que ocurrió.
+ * 
+ * @param idCuenta ID de la cuenta cuya información de movimientos se quiere imprimir.
+ * @param db Puntero a la base de datos SQLite donde se encuentran los registros de los movimientos.
+ * 
+ * @note Si el ID de la cuenta comienza con "100", se consulta la tabla `Movimientos_Colones`.
+ *       Si comienza con "200", se consulta la tabla `Movimientos_dolares`.
+ *       Si el prefijo del ID no corresponde a estas tablas, se imprime un mensaje indicando que la cuenta no es válida.
+ * 
+ */
 void imprimirEstadoCuenta(const int& idCuenta, sqlite3* db) {
     // Convertir el id de cuenta a string para identificar si es de colones o dólares
     string idCuentaStr = to_string(idCuenta);
@@ -902,7 +1050,20 @@ void imprimirEstadoCuenta(const int& idCuenta, sqlite3* db) {
 }
 
 
-//Se busca automatizar lo que es el envio de informacion a las bases de datos de movimientos.
+/**
+ * @brief Agrega un nuevo movimiento a la base de datos de acuerdo con el tipo de cuenta.
+ * 
+ * Esta función inserta un nuevo registro en la tabla correspondiente (`Movimientos_Colones` o `Movimientos_dolares`) 
+ * para el ID de cuenta proporcionado. Dependiendo del prefijo del ID de cuenta (100 para colones, 200 para dólares), 
+ * la consulta SQL se dirige a la tabla adecuada. El movimiento incluye el detalle proporcionado.
+ * 
+ * @param id ID de la cuenta a la que se registrará el movimiento.
+ * @param Detalle Descripción detallada del movimiento que se desea registrar.
+ * @param db Puntero a la base de datos SQLite donde se insertará el movimiento.
+ * 
+ * @note Si el prefijo del ID de la cuenta no es "100" ni "200", se imprime un mensaje de error indicando que el ID 
+ *       no corresponde a un tipo de cuenta válido.
+ */
 void AgregarMov(const int& id, const string& Detalle, sqlite3* db) {
     // Convertir el id de cuenta a string para poder analizar el prefijo
     string idStr = to_string(id);
@@ -945,8 +1106,21 @@ void AgregarMov(const int& id, const string& Detalle, sqlite3* db) {
     sqlite3_finalize(stmt);
 }
 
-// Funcion para desplegar el menu de opciones de atencion al cliente
-// Función para desplegar el menú de opciones de atención al cliente
+/**
+ * @brief Muestra el menú de opciones de atención al cliente y maneja la selección del usuario.
+ * 
+ * Esta función muestra un menú con diversas opciones de servicios disponibles para el cliente. Dependiendo de la opción 
+ * seleccionada por el usuario, se ejecuta una operación específica, como realizar un depósito, retiro, transferencia, 
+ * entre otros. La función permite que el cliente interactúe con el sistema realizando diversas consultas y transacciones 
+ * en base a su cuenta.
+ * 
+ * @param idCuenta ID de la cuenta del cliente para las operaciones relacionadas.
+ * @param TipoCambio Tipo de cambio que se puede usar en servicios de cambio de divisa.
+ * @param db Puntero a la base de datos SQLite que contiene la información de la cuenta y las transacciones.
+ * 
+ * @note Se valida que la opción ingresada esté en el rango válido (1-10). Si el usuario ingresa una opción fuera de ese 
+ *       rango o con un formato inválido, se lanzará una excepción.
+ */
 void showMenuAC(const int& idCuenta, const double& TipoCambio, sqlite3* db) {
     int opcion;
 
