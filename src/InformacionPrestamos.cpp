@@ -60,10 +60,7 @@ void showMenuSP(const int& idCuenta, sqlite3* db) {
                 case 3:
                     cout << "Regresando al menú anterior..." << endl;
                     break;
-                default:
-                    // Este caso no debería ocurrir debido a la validación previa
-                    cout << "Opción no válida. Por favor, intente de nuevo." << endl;
-            }
+                }
         } catch (const invalid_argument& e) {
             cout << "Error: " << e.what() << endl;
             cin.clear();
@@ -262,9 +259,7 @@ void gestionarPrestamo(sqlite3* db, const int& idCuenta) {
                 cout << "Regresando..." << endl;
                 break;
 
-            default:
-                cerr << "Opcion invalida.\n";
-                return;
+            return;
         }
 
 }

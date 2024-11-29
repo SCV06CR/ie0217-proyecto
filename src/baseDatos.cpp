@@ -63,7 +63,7 @@ void crearTablas(sqlite3* db) {
     // El id INTEGER puede ser cualquiera de los dos tipos de id de colones o dólares. 
     const char* sqlMovimientosColones = R"(
         CREATE TABLE IF NOT EXISTS Movimientos_Colones (
-            id_cuenta INTEGER NOT NULL, -- Clave foránea a la tabla de cuentas
+            id_cuenta INTEGER NOT NULL, -- Clave foránea a la tabla de cuentas en colones
             detalle TEXT NOT NULL, -- Descripción de lo que se hizo
             fecha TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL, -- Fecha del movimiento
             FOREIGN KEY (id_cuenta) REFERENCES Cuenta_Colones(id) ON DELETE CASCADE
@@ -71,12 +71,12 @@ void crearTablas(sqlite3* db) {
     )";
    // Tabla de Movimientos de cuentas en dolares
     // El id INTEGER puede ser cualquiera de los dos tipos de id de colones o dólares. 
-    const char* sqlMovimientosdolares = R"(
-        CREATE TABLE IF NOT EXISTS Movimientos_dolares (
-            id_cuenta INTEGER NOT NULL, -- Clave foránea a la tabla de cuentas
+    const char* sqlMovimientosDolares = R"(
+        CREATE TABLE IF NOT EXISTS Movimientos_Dolares (
+            id_cuenta INTEGER NOT NULL, -- Clave foránea a la tabla de cuentas en dólares
             detalle TEXT NOT NULL, -- Descripción de lo que se hizo
             fecha TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL, -- Fecha del movimiento
-            FOREIGN KEY (id_cuenta) REFERENCES Cuenta_Colones(id) ON DELETE CASCADE
+            FOREIGN KEY (id_cuenta) REFERENCES Cuenta_Dolares(id) ON DELETE CASCADE
         );
     )";
 
@@ -118,7 +118,7 @@ void crearTablas(sqlite3* db) {
     ejecutarSQL(db, sqlCuentaColones);
     ejecutarSQL(db, sqlCuentaDolares);
     ejecutarSQL(db, sqlMovimientosColones);
-    ejecutarSQL(db, sqlMovimientosdolares);
+    ejecutarSQL(db, sqlMovimientosDolares);
     ejecutarSQL(db, sqlPrestamosColones);
     ejecutarSQL(db, sqlPrestamosDolares);
 

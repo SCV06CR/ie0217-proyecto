@@ -144,9 +144,7 @@ int main() {
             case 3:
                 cout << "\nSaliendo del programa...\nGracias por su visita." << endl;
                 
-            default:
-                cout << "\nOpción inválida...\nPor favor ingrese una opción correcta.\n\n";
-                break;
+
         }
 
     } while (option != 3);
