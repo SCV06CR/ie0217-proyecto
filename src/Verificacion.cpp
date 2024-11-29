@@ -4,8 +4,7 @@
 #include <sstream>
 #include <iomanip>
 #include <openssl/sha.h>
-#include "AbrirDB.hpp"
-#include "Hash.hpp"
+#include "UU.hpp"
 
 using namespace std;
 
