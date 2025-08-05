@@ -10,6 +10,7 @@
 </p>
 
 ## Tabla de contenidos
+- [Contextualización del proyecto](#contextualización-del-proyecto)
 - [Instrucciones para la ejecución](#instrucciones-para-la-ejecución)
 - [Primera Fase del Proyecto - Parte Teórica](#primera-fase-del-proyecto)
 - [Definición de términos e ideas](#definición-de-términos-e-ideas)
@@ -17,6 +18,24 @@
 - [Pruebas de Ejecución del programa](#purebas-de-ejecución-del-programa)
 - [Cronograma de actividades](#cronograma-de-actividades)
 - [Referencias](#referencias)
+
+
+
+## Contextualización del proyecto
+
+El objetivo principal fue diseñar, programar e implementar un **sistema de gestión bancaria** orientado a la operación de agentes de atención al cliente en ventanillas. La solución desarrollada permite simular funcionalidades clave de una entidad financiera, como:
+
+- Consulta y manejo de cuentas en colones y dólares.
+- Gestión de préstamos (personales, prendarios e hipotecarios).
+- Operaciones como depósitos, retiros, transferencias y abonos a préstamos.
+- Generación de tablas de amortización y reportes tabulares en formato de texto.
+- Identificación única de clientes y registro histórico de transacciones.
+
+El proyecto se desarrolló en **C++** con enfoque en buenas prácticas de **programación orientada a objetos**, y utilizando **SQLite** para el almacenamiento de datos. Además, se documentó utilizando **Doxygen**, y su organización y control de versiones se gestionó a través de **GitHub**.
+
+También se diseñó un sitio web con la documentación técnica del proyecto, disponible en:  
+🔗 [https://proyecto-ie0217-rsj.netlify.app](https://proyecto-ie0217-rsj.netlify.app)
+
 
 ## Instrucciones para la ejecución 
 
